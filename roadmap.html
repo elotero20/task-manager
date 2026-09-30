@@ -234,6 +234,13 @@ body.dark .tk-badge-overdue{background:#2d1010;border-color:#8a2020;color:#e0808
 .notes-clear-btn{font-size:11px;color:var(--text-faint);background:transparent;border:none;cursor:pointer;padding:0;font-family:inherit;text-decoration:underline}
 .notes-clear-btn:hover{color:#c0392b}
 
+/* ── Undo toast ── */
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,16px);background:var(--text);color:var(--bg-card);padding:10px 14px;border-radius:10px;font-size:13px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:400;box-shadow:0 6px 24px var(--shadow);max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast-msg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.toast button{background:transparent;border:none;color:#7fb8f0;font:inherit;font-weight:700;cursor:pointer;padding:0;flex-shrink:0}
+body.dark .toast button{color:#1a5a9a}
+
 @media(max-width:520px){.topbar{flex-direction:column;align-items:flex-start}.summary{flex-direction:column}.sc{min-width:0}.ph-hint{display:none}.notes-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -343,7 +350,7 @@ body.dark .tk-badge-overdue{background:#2d1010;border-color:#8a2020;color:#e0808
       <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-settings');showSetup()">Cambiar carpeta</button>
     </div>
 
-    <div class="btn-row" style="margin-top:1.5rem;border-top:1px solid #e8e6e0;padding-top:1rem">
+    <div class="btn-row" style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem">
       <button class="btn btn-primary" onclick="closeModal('modal-settings')">Cerrar</button>
     </div>
   </div>
@@ -400,6 +407,9 @@ body.dark .tk-badge-overdue{background:#2d1010;border-color:#8a2020;color:#e0808
   </div>
 </div>
 
+<!-- ═══ TOAST: Deshacer ═══ -->
+<div class="toast" id="toast" role="status"><span id="toast-msg"></span><button onclick="doUndo()">Deshacer</button></div>
+
 <!-- ═══ APP ═══ -->
 <div id="app" style="display:none">
   <div class="topbar">
@@ -431,6 +441,7 @@ body.dark .tk-badge-overdue{background:#2d1010;border-color:#8a2020;color:#e0808
 //  DEFAULTS — vacío para distribución pública
 // ═══════════════════════════════════════════════
 const DEFAULTS = { _names:{}, _order:[] };
+const APP_VERSION = '2.9';
 
 const JSON_FILE    = 'roadmap_tareas.json';
 const LOG_FILE     = 'roadmap_hist_cambios.txt';
@@ -546,7 +557,12 @@ async function loadFiles(){
     logHandle=await dirHandle.getFileHandle(LOG_FILE,{create:true});
     const file=await logHandle.getFile();
     const txt=await file.text();
-    if(txt.trim())txt.trim().split('\n').reverse().forEach(line=>logEntries.push({raw:line}));
+    // Las líneas [inicio] (una por apertura) solo añadían ruido: se omiten al mostrar
+    if(txt.trim())txt.trim().split(/\r?\n/).reverse().forEach(line=>{
+      const m=line.match(/^\[(.+?)\] \[(.+?)\] (.*)$/);
+      if(!m){if(line.trim())logEntries.push({raw:line});return;}
+      if(m[2]!=='inicio')logEntries.push({ts:m[1],tag:m[2],message:m[3]});
+    });
   }catch(e){console.error('Log load:',e);}
 
   // Archive
@@ -698,14 +714,14 @@ function exportTrack(){
   const tr=sel.value;
   if(!tr||!D[tr])return;
   const payload={
-    _export:{name:trName(tr),key:tr,date:new Date().toISOString(),version:'2.6'},
+    _export:{name:trName(tr),key:tr,date:new Date().toISOString(),version:APP_VERSION},
     phases:D[tr].phases
   };
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`roadmap_${tr}_${new Date().toISOString().slice(0,10)}.json`;
+  a.download=`roadmap_${tr}_${localISO()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   appendLog(`Proyecto exportado: "${trName(tr)}"`, 'export');
@@ -775,7 +791,6 @@ function showApp(){
       <p>Crea tu primer proyecto con el botón <b>＋ Nuevo proyecto</b> de arriba.</p>
     </div>`;
   renderLogPanel();
-  appendLog('Sesión iniciada — carpeta: '+dirHandle.name,'inicio');
 }
 function showSetup(){showScreen('screen-setup');}
 
@@ -922,7 +937,9 @@ function renderLogPanel(){
 }
 
 function trName(tr){return D._names?.[tr]||tr;}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+// Fecha local YYYY-MM-DD. toISOString() da UTC: en Sonora (UTC-7), desde las 17:00 ya es "mañana"
+function localISO(d=new Date()){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;}
 
 // ═══════════════════════════════════════════════
 //  TABS RENDER
@@ -1035,9 +1052,9 @@ function render(tr){
       </div>
       <div class="pb ${isO?'o':''}">`;
 
+    const today=localISO();
     ph.tasks.forEach((task,ti)=>{
       const hasNotes=!!(task.n||task.fd||task.resp||task.link);
-      const today=new Date().toISOString().slice(0,10);
       let badges='';
       if(task.fd){
         const overdue=task.fd<today&&!task.c;
@@ -1093,10 +1110,17 @@ function tgD(tr,pi,ti){
 }
 
 function dT(tr,pi,ti){
-  const name=D[tr].phases[pi].tasks[ti].x;
-  D[tr].phases[pi].tasks.splice(ti,1);scheduleJsonSave();
-  appendLog(`${trName(tr)} · Tarea eliminada: "${name}"`,'eliminada');
+  const ph=D[tr].phases[pi];
+  const [item]=ph.tasks.splice(ti,1);scheduleJsonSave();
+  appendLog(`${trName(tr)} · Tarea eliminada: "${item.x}"`,'eliminada');
   render(tr);
+  offerUndo(`Tarea eliminada: "${item.x}"`,()=>{
+    // Se restaura en su fase aunque se haya movido; si la fase ya no existe, no hay dónde volver
+    if(!D[tr]?.phases.includes(ph))return;
+    ph.tasks.splice(Math.min(ti,ph.tasks.length),0,item);scheduleJsonSave();
+    appendLog(`${trName(tr)} · Tarea restaurada: "${item.x}"`,'restaurada');
+    render(tr);
+  });
 }
 
 function aT(tr,pi){
@@ -1113,10 +1137,39 @@ function dPh(tr,pi){
   if(D[tr].phases.length<=1)return;
   const name=D[tr].phases[pi].l;
   if(!confirm(`¿Eliminar la fase "${name}" y todas sus tareas?`))return;
-  D[tr].phases.splice(pi,1);scheduleJsonSave();
+  const [ph]=D[tr].phases.splice(pi,1);scheduleJsonSave();
+  const o0=phOpen[tr]||{},n0={};
+  Object.keys(o0).forEach(k=>{const i=+k;if(i!==pi)n0[i>pi?i-1:i]=o0[k];});
+  phOpen[tr]=n0;
   appendLog(`${trName(tr)} · Fase eliminada: "${name}"`,'fase-eliminada');
   render(tr);
+  offerUndo(`Fase eliminada: "${name}"`,()=>{
+    if(!D[tr])return;
+    const phases=D[tr].phases,at=Math.min(pi,phases.length);
+    phases.splice(at,0,ph);
+    // phOpen va por índice: desplazar las fases posteriores
+    const o=phOpen[tr]||{},n={};
+    Object.keys(o).forEach(k=>{const i=+k;n[i>=at?i+1:i]=o[k];});
+    n[at]=true;phOpen[tr]=n;
+    scheduleJsonSave();
+    appendLog(`${trName(tr)} · Fase restaurada: "${name}"`,'restaurada');
+    render(tr);
+  });
 }
+
+// ═══════════════════════════════════════════════
+//  UNDO (toast)
+// ═══════════════════════════════════════════════
+let _undo=null,_toastTimer=null;
+function offerUndo(msg,restore){
+  _undo=restore;
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(hideToast,7000);
+}
+function hideToast(){document.getElementById('toast').classList.remove('show');_undo=null;}
+function doUndo(){const f=_undo;hideToast();if(f)f();}
 
 function aPh(tr){
   const pi=D[tr].phases.length;

@@ -5,3 +5,5 @@ roadmap_proyectos_eliminados.json
 # Exportaciones desde Ajustes (roadmap_<clave>_<fecha>.json)
 roadmap_*.json
 *.bak
+# Config local de Claude Code (servidor de pruebas)
+.claude/
