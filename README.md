@@ -12,3 +12,16 @@ Roadmap personal de proyectos en un único archivo HTML, sin servidor ni depende
 3. Las siguientes veces basta con un clic para volver a dar permiso a la carpeta.
 
 Los archivos de datos están en `.gitignore` y no se suben al repositorio.
+
+## Qué hace
+
+- **📅 Esta semana** (pantalla de inicio): el siguiente paso de cada proyecto
+  (la tarea marcada con ☆, o una sugerida), lo vencido, lo que vence en 7 días
+  y lo que espera respuesta de alguien.
+- **Proyectos → fases → tareas**, con prioridad por fase, etiquetas y reordenar
+  arrastrando.
+- **Detalle de tarea (📝)**: notas, fecha objetivo, responsable, enlace y
+  *esperando a…* con fecha de último contacto. Pasados N días (Ajustes →
+  Seguimientos) la tarea se marca en naranja: toca insistir.
+- Deshacer al borrar tareas o fases, historial de cambios y exportar/importar
+  proyectos como JSON.

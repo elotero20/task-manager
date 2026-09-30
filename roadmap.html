@@ -238,6 +238,35 @@ body.dark .tk-badge-stale{background:#2e1f0a;border-color:#8a5a10;color:#f0b060}
 .notes-clear-btn{font-size:11px;color:var(--text-faint);background:transparent;border:none;cursor:pointer;padding:0;font-family:inherit;text-decoration:underline}
 .notes-clear-btn:hover{color:#c0392b}
 
+/* ── Siguiente paso (estrella) ── */
+.tk-star{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--border-sub);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;opacity:0;transition:opacity .12s,background .12s;line-height:1}
+.tk:hover .tk-star,.wk-row .tk-star{opacity:1}
+.tk-star:hover{background:var(--bg-hover);color:#EF9F27}
+.tk-star.on{opacity:1;color:#EF9F27}
+.tk.flash{animation:flash 1.8s ease-out}
+@keyframes flash{0%,30%{background:rgba(59,139,212,.22)}100%{background:transparent}}
+
+/* ── Vista "Esta semana" ── */
+.tab-week{padding:6px 14px}
+.wk-sec{margin-bottom:.9rem;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);overflow:hidden}
+.wk-hd{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--bg-head);border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text)}
+.wk-hd .wk-n{margin-left:auto;font-size:11px;font-weight:400;color:var(--text-muted)}
+.wk-bd{padding:2px 13px}
+.wk-proj{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;padding:10px 0 2px}
+.wk-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border-faint)}
+.wk-row:last-child{border-bottom:none}
+.wk-main{flex:1;min-width:0}
+.wk-tx{font-size:13px;color:var(--text);line-height:1.45;cursor:pointer;word-break:break-word}
+.wk-tx:hover{color:#3B8BD4;text-decoration:underline}
+.wk-meta{font-size:11px;color:var(--text-faint);margin-top:1px}
+.wk-sug{font-style:italic}
+.wk-row .tk-note-btn{opacity:1}
+.wk-empty{font-size:12px;color:var(--text-faint);padding:10px 0;line-height:1.5}
+.sc.alert .sc-v{color:#c0392b}
+body.dark .sc.alert .sc-v{color:#e08080}
+.sc.warn .sc-v{color:#b86a00}
+body.dark .sc.warn .sc-v{color:#f0b060}
+
 /* ── Undo toast ── */
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,16px);background:var(--text);color:var(--bg-card);padding:10px 14px;border-radius:10px;font-size:13px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:400;box-shadow:0 6px 24px var(--shadow);max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
@@ -245,7 +274,7 @@ body.dark .tk-badge-stale{background:#2e1f0a;border-color:#8a5a10;color:#f0b060}
 .toast button{background:transparent;border:none;color:#7fb8f0;font:inherit;font-weight:700;cursor:pointer;padding:0;flex-shrink:0}
 body.dark .toast button{color:#1a5a9a}
 
-@media(max-width:520px){.topbar{flex-direction:column;align-items:flex-start}.summary{flex-direction:column}.sc{min-width:0}.ph-hint{display:none}.notes-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.wk-row{flex-wrap:wrap}.wk-row .tk-badges{order:5;flex-basis:100%;margin-left:24px}.topbar{flex-direction:column;align-items:flex-start}.sc{min-width:calc(50% - 4px)}.ph-hint{display:none}.notes-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -442,7 +471,7 @@ body.dark .toast button{color:#1a5a9a}
   <div class="topbar">
     <div class="topbar-left">
       <h1>Mapa estratégico — Alberto Otero</h1>
-      <p>Doble clic en nombre/etiqueta para editar · Clic en ● para cambiar prioridad · Arrastra ⠿ para reordenar</p>
+      <p>Doble clic en tarea/etiqueta para editar · ☆ marca el siguiente paso · 📝 fechas y seguimientos · ● prioridad · ⠿ reordenar</p>
     </div>
     <div class="topbar-right">
       <div class="pill saving" id="pill-json"><div class="pill-dot"></div><span id="ptxt-json">tareas.json</span></div>
@@ -452,6 +481,7 @@ body.dark .toast button{color:#1a5a9a}
   </div>
 
   <div class="tabs-bar" id="tabs-bar"></div>
+  <div class="track" id="week-view"></div>
   <div id="tracks-container"></div>
 
   <div class="log-panel">
@@ -469,6 +499,7 @@ body.dark .toast button{color:#1a5a9a}
 // ═══════════════════════════════════════════════
 const DEFAULTS = { _names:{}, _order:[] };
 const APP_VERSION = '2.9';
+const WEEK = '__week';   // pseudo-pestaña "Esta semana" (no es un proyecto)
 
 const JSON_FILE    = 'roadmap_tareas.json';
 const LOG_FILE     = 'roadmap_hist_cambios.txt';
@@ -805,12 +836,12 @@ function showApp(){
   document.getElementById('app').style.display='block';
   setPill('json','ok',JSON_FILE);
   setPill('log','ok',LOG_FILE);
-  currentTr=D._order?.[0]||null;
+  currentTr=(D._order||[]).length?WEEK:null;
   // Init phOpen
   (D._order||[]).forEach(tr=>{if(!phOpen[tr])phOpen[tr]={0:true};});
   renderTabs();
   renderTrackContainers();
-  if(currentTr) render(currentTr);
+  if(currentTr) sw(currentTr);
   else document.getElementById('tracks-container').innerHTML=`
     <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;background:var(--bg-card)">
       <div class="empty-icon">🗂️</div>
@@ -828,7 +859,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 //  TAB RENAME
 // ═══════════════════════════════════════════════
 function renameTab(tr, tabIdx){
-  const tabs=document.querySelectorAll('#tabs-bar .tab:not(.tab-add)');
+  const tabs=document.querySelectorAll('#tabs-bar .tab:not(.tab-add):not(.tab-week)');
   const tabEl=tabs[tabIdx];
   if(!tabEl)return;
   const labelEl=tabEl.querySelector('.tab-label');
@@ -995,8 +1026,10 @@ function sw(tr){
   renderTabs();
   // Show only active track
   document.querySelectorAll('.track').forEach(t=>t.classList.remove('show'));
-  const el=document.getElementById('t-'+tr);
+  const el=document.getElementById(tr===WEEK?'week-view':'t-'+tr);
   if(el)el.classList.add('show');
+  // Solo se pintaba el primer proyecto al abrir: los demás salían en blanco
+  render(tr);
 }
 
 function toggleLog(){
@@ -1026,7 +1059,8 @@ function localISO(d=new Date()){const z=n=>String(n).padStart(2,'0');return `${d
 function renderTabs(){
   const order=D._order||[];
   const onlyOne=order.length<=1;
-  let h=order.map((tr,idx)=>{
+  let h=order.length?`<button class="tab tab-week${currentTr===WEEK?' active':''}" onclick="sw('${WEEK}')"><span class="tab-label">📅 Esta semana</span></button>`:'';
+  h+=order.map((tr,idx)=>{
     const active=tr===currentTr;
     return `<button class="tab${active?' active':''}" onclick="sw('${tr}')">
       <span class="tab-label">${esc(trName(tr))}</span>
@@ -1070,7 +1104,14 @@ function renderTrackContainers(){
 //  RENDER TRACK
 // ═══════════════════════════════════════════════
 function render(tr){
+  if(tr===WEEK){renderWeek();return;}
   if(!D||!D[tr])return;
+  renderTrack(tr);
+  // Toda acción llama a render(tr): si se hizo desde "Esta semana", refrescarla
+  if(currentTr===WEEK)renderWeek();
+}
+
+function renderTrack(tr){
   if(!phOpen[tr])phOpen[tr]={0:true};
   const phases=D[tr].phases;
   if(!phases||phases.length===0){
@@ -1135,7 +1176,7 @@ function render(tr){
     ph.tasks.forEach((task,ti)=>{
       const hasNotes=!!(task.n||task.fd||task.resp||task.link||task.w);
       const badges=taskBadges(task,today);
-      h+=`<div class="tk" draggable="true"
+      h+=`<div class="tk" id="tk-${tr}-${pi}-${ti}" draggable="true"
           ondragstart="dragStart(event,'${tr}',${pi},${ti})"
           ondragover="dragOver(event,this)"
           ondragleave="this.classList.remove('drag-over')"
@@ -1145,6 +1186,7 @@ function render(tr){
         <div class="cb ${task.c?'ck':''}" onclick="tgD('${tr}',${pi},${ti})"></div>
         <span class="tx ${task.c?'done':''}" ondblclick="eT('${tr}',${pi},${ti},'x',this)">${esc(task.x)}</span>
         ${badges?`<div class="tk-badges">${badges}</div>`:''}
+        ${task.c?'':starBtn(tr,pi,ti,task)}
         <button class="tk-note-btn ${hasNotes?'has-notes':''}" title="${hasNotes?'Ver notas':'Añadir notas'}" onclick="openNotes('${tr}',${pi},${ti})">📝</button>
         <span class="tg" ondblclick="eT('${tr}',${pi},${ti},'g',this)">${esc(task.g)}</span>
         <button class="xi" onclick="dT('${tr}',${pi},${ti})">✕</button>
@@ -1180,7 +1222,113 @@ function cycleDot(tr,pi){
 function tgD(tr,pi,ti){
   const t=D[tr].phases[pi].tasks[ti];t.c=!t.c;scheduleJsonSave();
   appendLog(`${trName(tr)} · "${t.x}" → ${t.c?'✅ completada':'⬜ desmarcada'}`,t.c?'completada':'desmarcada');
+  // Aquí la tarea desaparece de la lista al completarla: dar opción a deshacer
   render(tr);
+  if(t.c&&currentTr===WEEK)offerUndo(`Completada: "${t.x}"`,()=>{if(t.c){t.c=false;scheduleJsonSave();appendLog(`${trName(tr)} · "${t.x}" → ⬜ desmarcada`,'desmarcada');render(tr);}});
+}
+
+// ═══════════════════════════════════════════════
+//  "ESTA SEMANA"
+// ═══════════════════════════════════════════════
+function starBtn(tr,pi,ti,task){
+  return `<button class="tk-star ${task.nx?'on':''}" title="${task.nx?'Quitar de siguiente paso':'Marcar como siguiente paso'}" onclick="tgNx('${tr}',${pi},${ti})">${task.nx?'★':'☆'}</button>`;
+}
+function tgNx(tr,pi,ti){
+  const t=D[tr].phases[pi].tasks[ti];
+  if(t.nx)delete t.nx;else t.nx=true;
+  scheduleJsonSave();
+  appendLog(`${trName(tr)} · "${t.x}" → ${t.nx?'★ siguiente paso':'☆ ya no es siguiente paso'}`,'siguiente');
+  render(tr);
+}
+
+function jumpTo(tr,pi,ti){
+  if(!phOpen[tr])phOpen[tr]={};
+  phOpen[tr][pi]=true;
+  sw(tr);
+  const el=document.getElementById(`tk-${tr}-${pi}-${ti}`);
+  if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');}
+}
+
+function openTasks(){
+  const out=[];
+  (D._order||[]).forEach(tr=>(D[tr]?.phases||[]).forEach((ph,pi)=>ph.tasks.forEach((task,ti)=>{
+    if(!task.c)out.push({tr,pi,ti,task,ph});
+  })));
+  return out;
+}
+
+// Tareas con ★; si no hay, se sugiere la primera pendiente de la fase más prioritaria
+// (🔴 > 🟡 > 🔵, y en empate la que va antes), sin contar las que esperan a alguien.
+function nextSteps(tr){
+  const phases=D[tr]?.phases||[];
+  const starred=[];
+  phases.forEach((ph,pi)=>ph.tasks.forEach((task,ti)=>{if(task.nx&&!task.c)starred.push({tr,pi,ti,task,ph});}));
+  if(starred.length)return {items:starred,suggested:false};
+  const rank={n:0,s:1,l:2};
+  const byPrio=phases.map((ph,pi)=>({ph,pi})).sort((a,b)=>(rank[a.ph.d]??2)-(rank[b.ph.d]??2)||a.pi-b.pi);
+  for(const {ph,pi} of byPrio){
+    const ti=ph.tasks.findIndex(t=>!t.c&&!t.w);
+    if(ti>=0)return {items:[{tr,pi,ti,task:ph.tasks[ti],ph}],suggested:true};
+  }
+  return {items:[],suggested:false};
+}
+
+function weekRow(o,today,opts={}){
+  const {tr,pi,ti,task,ph}=o;
+  const badges=taskBadges(task,today);
+  const meta=opts.showProject===false?esc(ph.l):`${esc(trName(tr))} · ${esc(ph.l)}`;
+  return `<div class="wk-row">
+    <div class="cb" title="Completar" onclick="tgD('${tr}',${pi},${ti})"></div>
+    <div class="wk-main">
+      <div class="wk-tx" title="Ir a la tarea en su proyecto" onclick="jumpTo('${tr}',${pi},${ti})">${esc(task.x)}</div>
+      <div class="wk-meta">${meta}${opts.suggested?' · <span class="wk-sug">sugerida — marca ☆ en una tarea para fijarla</span>':''}</div>
+    </div>
+    ${badges?`<div class="tk-badges">${badges}</div>`:''}
+    ${opts.follow?`<button class="ab" title="Registrar que hoy volviste a contactar" onclick="followUp('${tr}',${pi},${ti})">Insistí hoy</button>`:''}
+    ${starBtn(tr,pi,ti,task)}
+    <button class="tk-note-btn ${(task.n||task.fd||task.resp||task.link||task.w)?'has-notes':''}" title="Detalle" onclick="openNotes('${tr}',${pi},${ti})">📝</button>
+  </div>`;
+}
+
+function weekSection(title,items,today,empty,opts){
+  const body=items.length?items.map(o=>weekRow(o,today,opts)).join(''):`<div class="wk-empty">${empty}</div>`;
+  return `<div class="wk-sec"><div class="wk-hd">${title}<span class="wk-n">${items.length||''}</span></div><div class="wk-bd">${body}</div></div>`;
+}
+
+function renderWeek(){
+  const el=document.getElementById('week-view');
+  if(!el||!D)return;
+  const today=localISO();
+  const in7=(()=>{const d=new Date();d.setDate(d.getDate()+7);return localISO(d);})();
+  const open=openTasks();
+  const byDate=(a,b)=>a.task.fd.localeCompare(b.task.fd);
+  const overdue=open.filter(o=>o.task.fd&&o.task.fd<today).sort(byDate);
+  const soon=open.filter(o=>o.task.fd&&o.task.fd>=today&&o.task.fd<=in7).sort(byDate);
+  const waiting=open.filter(o=>o.task.w).sort((a,b)=>(daysSince(b.task.wd)??-1)-(daysSince(a.task.wd)??-1));
+  const stale=waiting.filter(o=>isStale(o.task)).length;
+
+  let h=`<div class="summary">
+    <div class="sc${overdue.length?' alert':''}"><div class="sc-l">Vencidas</div><div class="sc-v">${overdue.length}</div></div>
+    <div class="sc"><div class="sc-l">Próximos 7 días</div><div class="sc-v">${soon.length}</div></div>
+    <div class="sc"><div class="sc-l">Esperando respuesta</div><div class="sc-v">${waiting.length}</div></div>
+    <div class="sc${stale?' warn':''}"><div class="sc-l">Toca insistir</div><div class="sc-v">${stale}</div></div>
+  </div>`;
+
+  // Siguiente paso por proyecto
+  let nx='';
+  (D._order||[]).forEach(tr=>{
+    const {items,suggested}=nextSteps(tr);
+    nx+=`<div class="wk-proj">${esc(trName(tr))}</div>`;
+    nx+=items.length?items.map(o=>weekRow(o,today,{suggested,showProject:false})).join('')
+      :`<div class="wk-empty">Nada pendiente en este proyecto.</div>`;
+  });
+  h+=`<div class="wk-sec"><div class="wk-hd">⭐ Siguiente paso por proyecto</div><div class="wk-bd">${nx}</div></div>`;
+
+  if(overdue.length)h+=weekSection('⚠ Vencidas',overdue,today,'');
+  h+=weekSection('📅 Próximos 7 días',soon,today,'Nada con fecha esta semana. Pon una fecha objetivo desde 📝 en cualquier tarea.');
+  h+=weekSection('⏳ Esperando respuesta',waiting,today,'No esperas a nadie. En 📝 → "Esperando a" anota quién tiene que responderte.',{follow:true});
+
+  el.innerHTML=h;
 }
 
 function dT(tr,pi,ti){
