@@ -1,0 +1,7 @@
+# Datos personales de la app — nunca al repo (es público)
+roadmap_tareas.json
+roadmap_hist_cambios.txt
+roadmap_proyectos_eliminados.json
+# Exportaciones desde Ajustes (roadmap_<clave>_<fecha>.json)
+roadmap_*.json
+*.bak

@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap — Alberto Otero</title>
+<style>
+/* ══ CSS VARIABLES — LIGHT / DARK ══ */
+:root{
+  --bg-page:#f5f4f0; --bg-card:#fff; --bg-head:#f8f7f3; --bg-hover:#f0efe9;
+  --bg-input:#f5f4f0; --bg-screen:#f5f4f0;
+  --text:#1a1a18; --text-sub:#555; --text-muted:#888780; --text-faint:#aaa;
+  --border:#e8e6e0; --border-sub:#d3d1c7; --border-faint:#f0efe9;
+  --shadow:rgba(0,0,0,.12);
+}
+body.dark{
+  --bg-page:#141416; --bg-card:#1e1e22; --bg-head:#252529; --bg-hover:#2d2d32;
+  --bg-input:#2a2a2f; --bg-screen:#141416;
+  --text:#e8e6e0; --text-sub:#bbb; --text-muted:#6e6e75; --text-faint:#555;
+  --border:#333338; --border-sub:#44444a; --border-faint:#2a2a2f;
+  --shadow:rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-page);color:var(--text);min-height:100vh;padding:1.5rem;transition:background .2s,color .2s}
+
+/* ── Overlay / Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;padding:1.5rem}
+.modal-overlay.show{display:flex}
+.screen{display:none;position:fixed;inset:0;background:var(--bg-screen);z-index:200;align-items:center;justify-content:center;padding:1.5rem;transition:background .2s}
+.screen.show{display:flex}
+.card{background:var(--bg-card);border-radius:16px;padding:2rem;max-width:480px;width:100%;box-shadow:0 4px 30px var(--shadow);border:1px solid var(--border);transition:background .2s,border-color .2s}
+.card h2{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;color:var(--text)}
+.card p{font-size:13px;color:var(--text-sub);line-height:1.6;margin-bottom:.75rem}
+.card-icon{font-size:2rem;margin-bottom:.75rem}
+.step-list{margin:1rem 0;display:grid;gap:8px}
+.step{display:flex;gap:10px;align-items:flex-start}
+.step-n{width:22px;height:22px;border-radius:50%;background:var(--text);color:var(--bg-card);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-t{font-size:13px;color:var(--text-sub);line-height:1.5}
+.step-t b{color:var(--text)}
+.hint{font-size:11px;color:var(--text-faint);margin-top:.75rem;line-height:1.5}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.25rem}
+
+/* ── Settings ── */
+.sett-section{border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem}
+.sett-section:first-of-type{border-top:none;padding-top:0;margin-top:0}
+.sett-section h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:.35rem}
+.sett-section p{font-size:12px;color:var(--text-muted);line-height:1.5;margin-bottom:.6rem}
+.sett-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sett-select{font-size:13px;padding:6px 10px;border:1px solid var(--border-sub);border-radius:8px;background:var(--bg-card);color:var(--text);font-family:inherit;flex:1;min-width:0;cursor:pointer}
+.sett-select:focus{outline:none;border-color:#3B8BD4}
+.file-label{font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid var(--border-sub);background:var(--bg-card);color:var(--text-sub);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s}
+.file-label:hover{background:var(--bg-hover);border-color:var(--text-muted)}
+.file-input{display:none}
+
+/* ── Dark mode toggle ── */
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--border-sub);border-radius:24px;transition:.2s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input:checked+.toggle-slider{background:#3B8BD4}
+input:checked+.toggle-slider::before{transform:translateX(20px)}
+.sett-row-between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sett-row-between-label{flex:1}
+.sett-row-between-label b{font-size:13px;font-weight:600;color:var(--text);display:block}
+.sett-row-between-label span{font-size:12px;color:var(--text-muted)}
+
+/* ── Danger note ── */
+.danger-note{font-size:11px;color:#c0392b;background:#fff5f5;border:1px solid #f5c6c6;border-radius:8px;padding:8px 12px;margin-top:.5rem;line-height:1.5}
+body.dark .danger-note{background:#2d1515;border-color:#6b2020}
+
+/* ── Buttons ── */
+.btn{padding:8px 16px;font-size:13px;border-radius:8px;border:1px solid;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;font-weight:500}
+.btn-primary{background:var(--text);color:var(--bg-card);border-color:var(--text)}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{background:var(--bg-card);color:var(--text-sub);border-color:var(--border-sub)}
+.btn-secondary:hover{background:var(--bg-hover);border-color:var(--text-muted)}
+.btn-danger{background:#c0392b;color:#fff;border-color:#c0392b}
+.btn-danger:hover{background:#a93226}
+.btn-ghost{background:transparent;color:var(--text-muted);border-color:transparent;font-size:12px;padding:6px 10px}
+.btn-ghost:hover{background:var(--bg-hover);color:var(--text)}
+.btn-sm{padding:5px 11px;font-size:12px}
+
+/* ── New project input ── */
+.new-proj-input{width:100%;font-size:14px;padding:8px 12px;border:1px solid var(--border-sub);border-radius:8px;outline:none;font-family:inherit;margin-bottom:.5rem;background:var(--bg-card);color:var(--text)}
+.new-proj-input:focus{border-color:#3B8BD4}
+
+/* ── Top bar ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.3rem}
+.topbar-left h1{font-size:1.15rem;font-weight:700;margin-bottom:2px;color:var(--text)}
+.topbar-left p{font-size:12px;color:var(--text-muted)}
+.topbar-right{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ── Pills ── */
+.pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid;white-space:nowrap}
+.pill-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.pill.ok{background:#f0f8f0;border-color:#90c090;color:#2a6a2a}.pill.ok .pill-dot{background:#50b050}
+.pill.saving{background:#f0f4ff;border-color:#90a0f0;color:#2a3a8a}.pill.saving .pill-dot{background:#5080f0;animation:blink .7s infinite}
+.pill.err{background:#fff0f0;border-color:#f09090;color:#8a2020}.pill.err .pill-dot{background:#e05050}
+body.dark .pill.ok{background:#0d2e0d;border-color:#2a5a2a;color:#80d080}
+body.dark .pill.saving{background:#0d1a40;border-color:#2a3a8a;color:#8098e0}
+body.dark .pill.err{background:#2e0d0d;border-color:#6a2020;color:#e08080}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── Tabs ── */
+.tabs-bar{display:flex;align-items:center;gap:6px;margin-bottom:1.1rem;flex-wrap:wrap}
+.tab{display:inline-flex;align-items:center;gap:5px;padding:6px 10px 6px 14px;font-size:13px;border-radius:8px;border:1px solid var(--border-sub);background:var(--bg-card);color:var(--text-muted);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.tab.active{color:var(--text);border-color:var(--text-muted);font-weight:600;box-shadow:0 1px 4px var(--shadow)}
+.tab-x{width:18px;height:18px;border-radius:4px;border:none;background:transparent;color:var(--border-sub);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;transition:all .12s}
+.tab-x:hover{background:#fde8e8;color:#a32d2d}
+.tab-add{border-style:dashed;color:var(--text-faint);padding:6px 13px}
+.tab-add:hover{color:var(--text);border-color:var(--text-muted);background:var(--bg-hover)}
+
+/* ── Summary cards ── */
+.track{display:none}.track.show{display:block}
+.summary{display:flex;gap:8px;margin-bottom:1.1rem;flex-wrap:wrap}
+.sc{background:var(--bg-card);border-radius:8px;padding:10px 14px;flex:1;min-width:80px;border:1px solid var(--border)}
+.sc-l{font-size:11px;color:var(--text-muted);margin-bottom:2px}
+.sc-v{font-size:22px;font-weight:700;color:var(--text)}
+
+/* ── Phase ── */
+.phase{margin-bottom:.9rem;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-card);transition:box-shadow .15s,border-color .2s,background .2s}
+.phase.ph-dragging{opacity:.35;box-shadow:0 8px 24px var(--shadow)}
+.phase.ph-drag-over-top{border-top:3px solid #3B8BD4}
+.phase.ph-drag-over-bot{border-bottom:3px solid #3B8BD4}
+.ph{display:flex;align-items:center;gap:6px;padding:10px 13px;background:var(--bg-head);cursor:pointer;border-bottom:1px solid var(--border);user-select:none;transition:background .2s}
+.ph:hover{background:var(--bg-hover)}
+.phdh{color:var(--border-sub);cursor:grab;font-size:14px;flex-shrink:0;padding:0 2px;line-height:1}
+.phdh:active{cursor:grabbing}.phdh:hover{color:var(--text-muted)}
+.ph-arrows{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.ph-arr{width:16px;height:14px;border:none;background:transparent;color:var(--border-sub);cursor:pointer;font-size:9px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:2px;line-height:1}
+.ph-arr:hover{background:var(--border);color:var(--text-sub)}
+.ph-arr:disabled{opacity:.2;cursor:default}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;cursor:pointer;transition:transform .1s}
+.dot:hover{transform:scale(1.4)}
+.dn{background:#E85D24}.ds{background:#EF9F27}.dl{background:#3B8BD4}
+.pl{font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:0}
+.pl-inp{font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:2px solid #3B8BD4;outline:none;flex:1;font-family:inherit;color:var(--text);min-width:0;width:100%}
+.ptag{font-size:11px;color:var(--text-muted);padding:2px 8px;border:1px solid var(--border);border-radius:20px;white-space:nowrap;cursor:text;flex-shrink:0;transition:background .15s}
+.ptag:hover{background:var(--bg-hover)}
+.ptag-inp{font-size:11px;color:var(--text-muted);background:var(--bg-card);border:1px solid #3B8BD4;border-radius:20px;padding:2px 8px;outline:none;font-family:inherit;width:100px;flex-shrink:0}
+.chev{font-size:10px;color:var(--text-faint);transition:transform .18s;flex-shrink:0}
+.chev.o{transform:rotate(90deg)}
+.pb{display:none;padding:10px 13px}.pb.o{display:block}
+.ph-hint{font-size:10px;color:var(--text-faint);padding:3px 13px 0;background:var(--bg-head);display:flex;gap:12px;border-bottom:1px solid var(--border-faint)}
+.ph-hint span{padding-bottom:4px}
+.dot-tip{position:relative;display:inline-flex}
+.dot-tip .tip{display:none;position:absolute;left:18px;top:50%;transform:translateY(-50%);background:var(--text);color:var(--bg-card);font-size:10px;padding:3px 7px;border-radius:5px;white-space:nowrap;z-index:10;pointer-events:none}
+.dot-tip:hover .tip{display:block}
+.ph-edit{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--border-sub);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;opacity:0;transition:opacity .15s,background .12s}
+.ph:hover .ph-edit{opacity:1}
+.ph-edit:hover{background:var(--border);color:var(--text-sub);opacity:1}
+
+/* ── Tasks ── */
+.tk{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-faint)}
+.tk:last-of-type{border-bottom:none}
+.tk.dragging{opacity:.3}.tk.drag-over{border-top:2px solid #3B8BD4;padding-top:4px}
+.dh{color:var(--border-sub);cursor:grab;font-size:13px;margin-top:2px;flex-shrink:0;line-height:1;padding:0 1px}
+.dh:active{cursor:grabbing}
+.cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border-sub);flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cb.ck{background:#3B8BD4;border-color:#3B8BD4}
+.cb.ck::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+.tx{font-size:13px;color:var(--text);line-height:1.45;flex:1;cursor:text;word-break:break-word}
+.tx.done{color:var(--text-faint);text-decoration:line-through}
+.tx-inp{font-size:13px;background:transparent;border:none;border-bottom:1.5px solid #3B8BD4;outline:none;font-family:inherit;color:var(--text);flex:1;padding:0;min-width:0;width:100%}
+.tg{font-size:10px;color:var(--text-muted);background:var(--bg-input);border-radius:20px;padding:2px 8px;border:1px solid var(--border);cursor:text;white-space:nowrap;flex-shrink:0}
+.tg-inp{font-size:10px;color:var(--text-muted);background:var(--bg-input);border:1px solid #3B8BD4;border-radius:20px;padding:2px 8px;outline:none;font-family:inherit;width:72px;flex-shrink:0}
+.xi{width:22px;height:22px;border-radius:4px;border:none;background:transparent;color:var(--border-sub);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.xi:hover{background:#fde8e8;color:#a32d2d}
+.ar{display:flex;gap:6px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+.ai{font-size:13px;flex:1;background:transparent;border:none;border-bottom:1.5px solid var(--border);outline:none;font-family:inherit;padding:2px 0;color:var(--text);min-width:0}
+.ai:focus{border-bottom-color:#3B8BD4}
+.ati{font-size:11px;width:72px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;padding:3px 8px;outline:none;font-family:inherit;color:var(--text-muted);flex-shrink:0}
+.ab{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid var(--border-sub);background:var(--bg-card);color:var(--text-muted);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s}
+.ab:hover{background:var(--bg-hover);color:var(--text)}
+.bo{height:3px;background:var(--border-faint);border-radius:2px;margin-top:10px}
+.bi{height:100%;border-radius:2px;background:#3B8BD4;transition:width .35s}
+
+/* ── Add phase ── */
+.apb{display:flex;align-items:center;gap:6px;width:100%;padding:9px 13px;border-radius:12px;border:1px dashed var(--border-sub);background:transparent;color:var(--text-faint);cursor:pointer;font-size:13px;font-family:inherit;margin-top:4px;transition:all .15s}
+.apb:hover{background:var(--bg-hover);color:var(--text);border-color:var(--text-muted)}
+
+/* ── Log panel ── */
+.log-panel{margin-top:1.4rem;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-card)}
+.log-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:var(--bg-head);border-bottom:1px solid var(--border);cursor:pointer}
+.log-hd-l{font-size:13px;font-weight:600;color:var(--text)}
+.log-hd-r{font-size:11px;color:var(--text-faint)}
+.log-bd{display:none;max-height:220px;overflow-y:auto}.log-bd.o{display:block}
+.log-row{display:flex;gap:10px;align-items:baseline;padding:6px 13px;border-bottom:1px solid var(--border-faint);font-size:12px}
+.log-row:last-of-type{border-bottom:none}
+.log-ts{color:var(--text-faint);white-space:nowrap;flex-shrink:0;font-size:11px;font-variant-numeric:tabular-nums}
+.log-msg{color:var(--text-sub);flex:1;line-height:1.4}
+.log-tag{font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);white-space:nowrap;flex-shrink:0}
+.log-empty{padding:14px 13px;font-size:12px;color:var(--text-faint);text-align:center}
+
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
+.empty-state .empty-icon{font-size:2.5rem;margin-bottom:.75rem}
+.empty-state h3{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:.4rem}
+.empty-state p{font-size:13px;line-height:1.6}
+
+/* ── Tab rename ── */
+.tab-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.tab-rename-inp{font-size:13px;background:transparent;border:none;border-bottom:1.5px solid #3B8BD4;outline:none;font-family:inherit;color:var(--text);width:140px;padding:0;font-weight:600}
+.tab-pencil{width:18px;height:18px;border-radius:4px;border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;transition:all .12s;line-height:1}
+.tab-pencil:hover{background:var(--border);color:var(--text);}
+
+/* ── Task notes ── */
+.tk-note-btn{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--border-sub);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;opacity:0;transition:opacity .12s,background .12s}
+.tk:hover .tk-note-btn{opacity:1}
+.tk-note-btn:hover{background:var(--bg-hover);color:var(--text-muted);opacity:1}
+.tk-note-btn.has-notes{opacity:1;color:#3B8BD4}
+.tk-badges{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.tk-badge{font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid;white-space:nowrap}
+.tk-badge-date{background:#f0f8ff;border-color:#90c0f0;color:#1a5a9a}
+body.dark .tk-badge-date{background:#0d1f35;border-color:#2a5a9a;color:#80b0e0}
+.tk-badge-note{background:#fff8e8;border-color:#e0c060;color:#7a5a00}
+body.dark .tk-badge-note{background:#2a2010;border-color:#7a5a00;color:#d0a820}
+.tk-badge-overdue{background:#fff0f0;border-color:#f09090;color:#8a2020}
+body.dark .tk-badge-overdue{background:#2d1010;border-color:#8a2020;color:#e08080}
+
+/* ── Notes modal ── */
+.notes-modal .card{max-width:520px}
+.notes-modal-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.notes-task-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.notes-fields{display:grid;gap:1rem}
+.notes-field label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.35rem}
+.notes-field label span{font-weight:400;color:var(--text-faint);margin-left:4px}
+.notes-textarea{width:100%;font-size:13px;padding:9px 12px;border:1px solid var(--border-sub);border-radius:8px;background:var(--bg-card);color:var(--text);font-family:inherit;resize:vertical;min-height:90px;outline:none;line-height:1.5;transition:border-color .15s}
+.notes-textarea:focus{border-color:#3B8BD4}
+.notes-input{width:100%;font-size:13px;padding:7px 12px;border:1px solid var(--border-sub);border-radius:8px;background:var(--bg-card);color:var(--text);font-family:inherit;outline:none;transition:border-color .15s}
+.notes-input:focus{border-color:#3B8BD4}
+.notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.notes-clear-btn{font-size:11px;color:var(--text-faint);background:transparent;border:none;cursor:pointer;padding:0;font-family:inherit;text-decoration:underline}
+.notes-clear-btn:hover{color:#c0392b}
+
+@media(max-width:520px){.topbar{flex-direction:column;align-items:flex-start}.summary{flex-direction:column}.sc{min-width:0}.ph-hint{display:none}.notes-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN: First-time setup ═══ -->
+<div class="screen" id="screen-setup">
+  <div class="card">
+    <div class="card-icon">📁</div>
+    <h2>Configuración inicial — una sola vez</h2>
+    <p>Selecciona la carpeta donde están (o estarán) tus archivos de datos. El sistema creará automáticamente <b>roadmap_tareas.json</b> y <b>roadmap_hist_cambios.txt</b> si no existen.</p>
+    <div class="step-list">
+      <div class="step"><div class="step-n">1</div><div class="step-t">Haz clic en <b>Seleccionar carpeta</b></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-t">Elige la carpeta donde está este HTML</div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-t">Edge pedirá permiso de lectura/escritura — acepta <b>"Permitir"</b></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-t">La próxima vez, un solo clic bastará para reconectar</div></div>
+    </div>
+    <p class="hint">Esta configuración se guarda en el navegador. Solo tendrás que repetirla si cambias de equipo o limpias los datos del navegador.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="setupFolder()">Seleccionar carpeta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: Permission required ═══ -->
+<div class="screen" id="screen-permission">
+  <div class="card">
+    <div class="card-icon">🔓</div>
+    <h2>Permitir acceso a la carpeta</h2>
+    <p>El navegador requiere que confirmes el acceso a los archivos cada vez que abres el HTML.</p>
+    <p id="perm-folder-name" style="font-size:13px;color:#3B8BD4;font-weight:500;word-break:break-all"></p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="requestPermission()">🔓 Permitir acceso y continuar</button>
+      <button class="btn btn-secondary" onclick="setupFolder()">Cambiar carpeta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Confirmar eliminación de proyecto ═══ -->
+<div class="modal-overlay" id="modal-del">
+  <div class="card">
+    <div class="card-icon">🗑️</div>
+    <h2>Eliminar proyecto</h2>
+    <p>¿Seguro que quieres eliminar <b id="modal-del-name"></b>?</p>
+    <div class="danger-note">
+      ⚠️ Se guardará una copia completa en <b>roadmap_proyectos_eliminados.json</b> antes de eliminar. Podrás recuperar los datos desde ese archivo si cambias de opinión.
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-del')">Cancelar</button>
+      <button class="btn btn-danger" id="modal-del-confirm">Sí, eliminar proyecto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Ajustes ═══ -->
+<div class="modal-overlay" id="modal-settings" onclick="if(event.target===this)closeModal('modal-settings')">
+  <div class="card" style="max-width:500px">
+    <h2 style="font-size:1.1rem;margin-bottom:1.25rem">⚙ Ajustes</h2>
+
+    <!-- Dark mode -->
+    <div class="sett-section">
+      <div class="sett-row-between">
+        <div class="sett-row-between-label">
+          <b>🌙 Modo oscuro</b>
+          <span>Reduce el brillo de la interfaz</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dark-toggle" onchange="setDarkMode(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Exportar -->
+    <div class="sett-section">
+      <h3>📤 Exportar proyecto</h3>
+      <p>Descarga los datos de un proyecto como archivo JSON. Puedes usarlo como copia de seguridad o para importarlo en otra instalación.</p>
+      <div class="sett-row">
+        <select class="sett-select" id="export-select"></select>
+        <button class="btn btn-secondary btn-sm" onclick="exportTrack()">Descargar .json</button>
+      </div>
+    </div>
+
+    <!-- Importar -->
+    <div class="sett-section">
+      <h3>📥 Importar proyecto</h3>
+      <p>Carga un archivo JSON exportado previamente. Se añadirá como una nueva pestaña de proyecto.</p>
+      <div class="sett-row">
+        <label class="file-label">
+          Seleccionar archivo .json
+          <input class="file-input" type="file" accept=".json" onchange="importTrack(this)">
+        </label>
+      </div>
+      <p id="import-status" style="font-size:12px;color:#3B8BD4;margin-top:.5rem;display:none"></p>
+    </div>
+
+    <!-- Archivo de histórico -->
+    <div class="sett-section">
+      <h3>📦 Proyectos eliminados</h3>
+      <p>Cada proyecto que elimines queda guardado en <b>roadmap_proyectos_eliminados.json</b> en tu carpeta. Puedes reimportarlo en cualquier momento desde ahí.</p>
+    </div>
+
+    <!-- Carpeta -->
+    <div class="sett-section">
+      <h3>📁 Carpeta de datos</h3>
+      <p id="settings-folder-name" style="font-size:12px;color:#3B8BD4;font-weight:500;word-break:break-all;margin-bottom:.5rem"></p>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-settings');showSetup()">Cambiar carpeta</button>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.5rem;border-top:1px solid #e8e6e0;padding-top:1rem">
+      <button class="btn btn-primary" onclick="closeModal('modal-settings')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Nuevo proyecto ═══ -->
+<div class="modal-overlay" id="modal-new" onclick="if(event.target===this)closeModal('modal-new')">
+  <div class="card">
+    <div class="card-icon">➕</div>
+    <h2>Nuevo proyecto</h2>
+    <p>Introduce el nombre del nuevo proyecto. Se creará con una fase vacía para que empieces a añadir tareas.</p>
+    <input id="new-project-name" type="text" placeholder="Ej: Proyecto nuevo"
+      class="new-proj-input"
+      onkeydown="if(event.key==='Enter')confirmAddTrack()">
+    <p id="new-project-err" style="font-size:12px;color:#c0392b;display:none">Escribe un nombre para el proyecto.</p>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-new')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmAddTrack()">Crear proyecto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Notas de tarea ═══ -->
+<div class="modal-overlay notes-modal" id="modal-notes" onclick="if(event.target===this)saveAndCloseNotes()">
+  <div class="card">
+    <div class="notes-modal-title">Detalle de tarea</div>
+    <div class="notes-task-name" id="notes-task-name"></div>
+    <div class="notes-fields">
+      <div class="notes-field">
+        <label>📝 Notas <span>— contexto, referencias, decisiones</span></label>
+        <textarea class="notes-textarea" id="notes-text" placeholder="Escribe aquí cualquier detalle relevante…"></textarea>
+      </div>
+      <div class="notes-grid">
+        <div class="notes-field">
+          <label>📅 Fecha objetivo</label>
+          <input class="notes-input" type="date" id="notes-date">
+        </div>
+        <div class="notes-field">
+          <label>👤 Responsable</label>
+          <input class="notes-input" type="text" id="notes-resp" placeholder="Ej: Yo, proveedor…">
+        </div>
+      </div>
+      <div class="notes-field">
+        <label>🔗 Referencia / Link</label>
+        <input class="notes-input" type="text" id="notes-link" placeholder="URL, nombre de archivo, contacto…">
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content:space-between;align-items:center">
+      <button class="notes-clear-btn" onclick="clearNotes()">Limpiar todo</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="saveAndCloseNotes()">Guardar y cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Mapa estratégico — Alberto Otero</h1>
+      <p>Doble clic en nombre/etiqueta para editar · Clic en ● para cambiar prioridad · Arrastra ⠿ para reordenar</p>
+    </div>
+    <div class="topbar-right">
+      <div class="pill saving" id="pill-json"><div class="pill-dot"></div><span id="ptxt-json">tareas.json</span></div>
+      <div class="pill saving" id="pill-log"><div class="pill-dot"></div><span id="ptxt-log">historial.txt</span></div>
+      <button class="btn btn-ghost" onclick="openSettings()" title="Ajustes · Exportar · Importar">⚙ Ajustes</button>
+    </div>
+  </div>
+
+  <div class="tabs-bar" id="tabs-bar"></div>
+  <div id="tracks-container"></div>
+
+  <div class="log-panel">
+    <div class="log-hd" onclick="toggleLog()">
+      <span class="log-hd-l">📋 Historial de cambios</span>
+      <span class="log-hd-r" id="log-count">0 entradas</span>
+    </div>
+    <div class="log-bd" id="log-bd"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DEFAULTS — vacío para distribución pública
+// ═══════════════════════════════════════════════
+const DEFAULTS = { _names:{}, _order:[] };
+
+const JSON_FILE    = 'roadmap_tareas.json';
+const LOG_FILE     = 'roadmap_hist_cambios.txt';
+const ARCHIVE_FILE = 'roadmap_proyectos_eliminados.json';
+const IDB_NAME  = 'roadmap_store';
+const IDB_VER   = 1;
+const IDB_STORE = 'handles';
+const IDB_KEY   = 'dirHandle';
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let D           = null;
+let currentTr   = null;
+let dirHandle   = null;
+let jsonHandle  = null;
+let logHandle   = null;
+let archHandle  = null;
+let logEntries  = [];
+let logOpen     = false;
+const phOpen    = {};
+let jsonTimer   = null;
+let jsonBusy    = false;
+let jsonQueued  = false;
+let dragSrc     = null;
+let phDragSrc   = null;
+
+// ═══════════════════════════════════════════════
+//  INDEXEDDB
+// ═══════════════════════════════════════════════
+function openIDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(IDB_NAME,IDB_VER);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=e=>rej(e.target.error);
+  });
+}
+async function idbGet(key){
+  const db=await openIDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readonly');
+    const req=tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess=()=>res(req.result);
+    req.onerror=e=>rej(e.target.error);
+  });
+}
+async function idbSet(key,val){
+  const db=await openIDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(val,key);
+    tx.oncomplete=()=>res();
+    tx.onerror=e=>rej(e.target.error);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════
+async function boot(){
+  if(!window.showDirectoryPicker){
+    document.getElementById('screen-setup').innerHTML=`<div class="card"><div class="card-icon">⚠️</div><h2>Navegador no compatible</h2><p>Requiere <b>Edge 86+</b> o <b>Chrome 86+</b>.</p></div>`;
+    document.getElementById('screen-setup').classList.add('show');
+    return;
+  }
+  try{
+    const saved=await idbGet(IDB_KEY);
+    if(saved){
+      dirHandle=saved;
+      const perm=await dirHandle.queryPermission({mode:'readwrite'});
+      if(perm==='granted'){await loadFiles();showApp();}
+      else{document.getElementById('perm-folder-name').textContent='📂 '+dirHandle.name;showScreen('screen-permission');}
+      return;
+    }
+  }catch(_){}
+  showScreen('screen-setup');
+}
+
+async function setupFolder(){
+  try{
+    dirHandle=await window.showDirectoryPicker({mode:'readwrite'});
+    await idbSet(IDB_KEY,dirHandle);
+    await loadFiles();
+    showApp();
+  }catch(e){if(e.name!=='AbortError')alert('Error al seleccionar carpeta: '+e.message);}
+}
+
+async function requestPermission(){
+  try{
+    const perm=await dirHandle.requestPermission({mode:'readwrite'});
+    if(perm==='granted'){await loadFiles();showApp();}
+    else alert('Acceso denegado.');
+  }catch(e){alert('Error: '+e.message);}
+}
+
+// ═══════════════════════════════════════════════
+//  FILE OPERATIONS
+// ═══════════════════════════════════════════════
+async function loadFiles(){
+  // JSON
+  try{
+    jsonHandle=await dirHandle.getFileHandle(JSON_FILE,{create:true});
+    const file=await jsonHandle.getFile();
+    const txt=await file.text();
+    try{if(txt.trim())D=JSON.parse(txt);}catch(_){}
+  }catch(e){console.error('JSON load:',e);}
+  if(!D)D=JSON.parse(JSON.stringify(DEFAULTS));
+  ensureMeta();
+
+  // Log
+  try{
+    logHandle=await dirHandle.getFileHandle(LOG_FILE,{create:true});
+    const file=await logHandle.getFile();
+    const txt=await file.text();
+    if(txt.trim())txt.trim().split('\n').reverse().forEach(line=>logEntries.push({raw:line}));
+  }catch(e){console.error('Log load:',e);}
+
+  // Archive
+  try{
+    archHandle=await dirHandle.getFileHandle(ARCHIVE_FILE,{create:true});
+  }catch(e){console.error('Archive load:',e);}
+}
+
+function ensureMeta(){
+  if(!D._names){
+    D._names={};
+    Object.keys(D).filter(k=>!k.startsWith('_')).forEach(k=>{ D._names[k]=k; });
+  }
+  if(!D._order){
+    D._order=Object.keys(D).filter(k=>!k.startsWith('_'));
+  }
+}
+
+function scheduleJsonSave(){
+  clearTimeout(jsonTimer);
+  setPill('json','saving','Guardando…');
+  jsonTimer=setTimeout(writeJson,600);
+}
+
+async function writeJson(){
+  if(jsonBusy){jsonQueued=true;return;}
+  jsonBusy=true;
+  try{
+    const w=await jsonHandle.createWritable();
+    await w.write(JSON.stringify(D,null,2));
+    await w.close();
+    setPill('json','ok',JSON_FILE);
+  }catch(e){setPill('json','err','Error JSON');console.error(e);}
+  finally{jsonBusy=false;if(jsonQueued){jsonQueued=false;writeJson();}}
+}
+
+async function appendLog(message,tag){
+  const now=new Date();
+  const ts=now.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})
+    +' '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const line=`[${ts}] [${tag}] ${message}`;
+  logEntries.unshift({ts,message,tag});
+  renderLogPanel();
+  if(!logHandle)return;
+  setPill('log','saving',LOG_FILE);
+  try{
+    const file=await logHandle.getFile();
+    const current=await file.text();
+    const w=await logHandle.createWritable();
+    await w.write(current+line+'\n');
+    await w.close();
+    setPill('log','ok',LOG_FILE);
+  }catch(e){setPill('log','err','Error LOG');console.error(e);}
+}
+
+// ═══════════════════════════════════════════════
+//  PROJECT MANAGEMENT
+// ═══════════════════════════════════════════════
+function addTrack(){
+  document.getElementById('new-project-name').value='';
+  document.getElementById('new-project-err').style.display='none';
+  openModal('modal-new');
+  setTimeout(()=>document.getElementById('new-project-name').focus(),100);
+}
+
+function confirmAddTrack(){
+  const name=document.getElementById('new-project-name').value.trim();
+  if(!name){document.getElementById('new-project-err').style.display='block';return;}
+  closeModal('modal-new');
+  const key='p_'+Date.now();
+  if(!D._names)D._names={};
+  if(!D._order)D._order=[];
+  D._names[key]=name;
+  D._order.push(key);
+  D[key]={phases:[{l:'Fase 1',d:'l',t:'pendiente',tasks:[]}]};
+  phOpen[key]={0:true};
+  scheduleJsonSave();
+  appendLog(`Nuevo proyecto creado: "${name}"`, 'proyecto-nuevo');
+  currentTr=key;
+  renderTabs();
+  renderTrackContainers();
+  render(key);
+}
+
+let _pendingDeleteTr = null;
+
+function confirmDeleteTrack(tr){
+  _pendingDeleteTr=tr;
+  document.getElementById('modal-del-name').textContent=`"${trName(tr)}"`;
+  document.getElementById('modal-del-confirm').onclick=()=>executeDeleteTrack();
+  openModal('modal-del');
+}
+
+async function executeDeleteTrack(){
+  const tr=_pendingDeleteTr;
+  if(!tr)return;
+  closeModal('modal-del');
+  const name=trName(tr);
+
+  // Archive the project
+  await archiveProject(tr, name);
+
+  // Remove from D
+  delete D[tr];
+  if(D._names)delete D._names[tr];
+  if(D._order)D._order=D._order.filter(k=>k!==tr);
+  delete phOpen[tr];
+
+  // Switch to first remaining track
+  const remaining=D._order||[];
+  currentTr=remaining.length>0?remaining[0]:null;
+
+  scheduleJsonSave();
+  appendLog(`Proyecto eliminado y archivado: "${name}"`, 'proyecto-eliminado');
+  _pendingDeleteTr=null;
+  renderTabs();
+  renderTrackContainers();
+  if(currentTr)render(currentTr);
+}
+
+async function archiveProject(tr, name){
+  if(!archHandle)return;
+  try{
+    // Read existing archive
+    const file=await archHandle.getFile();
+    const txt=await file.text();
+    let archive=[];
+    try{if(txt.trim())archive=JSON.parse(txt);}catch(_){}
+
+    // Append entry
+    archive.push({
+      deletedAt: new Date().toISOString(),
+      name,
+      key: tr,
+      phases: D[tr]?.phases || []
+    });
+
+    const w=await archHandle.createWritable();
+    await w.write(JSON.stringify(archive,null,2));
+    await w.close();
+  }catch(e){console.error('Archive write error:',e);}
+}
+
+// ═══════════════════════════════════════════════
+//  EXPORT / IMPORT
+// ═══════════════════════════════════════════════
+function exportTrack(){
+  const sel=document.getElementById('export-select');
+  const tr=sel.value;
+  if(!tr||!D[tr])return;
+  const payload={
+    _export:{name:trName(tr),key:tr,date:new Date().toISOString(),version:'2.6'},
+    phases:D[tr].phases
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`roadmap_${tr}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  appendLog(`Proyecto exportado: "${trName(tr)}"`, 'export');
+}
+
+function importTrack(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const phases=data.phases||data;
+      if(!Array.isArray(phases))throw new Error('Formato incorrecto');
+      const name=data._export?.name||file.name.replace(/\.json$/,'');
+      const key='p_'+Date.now();
+      if(!D._names)D._names={};
+      if(!D._order)D._order=[];
+      D._names[key]=name;
+      D._order.push(key);
+      D[key]={phases};
+      phOpen[key]={0:true};
+      scheduleJsonSave();
+      appendLog(`Proyecto importado: "${name}"`, 'import');
+      const status=document.getElementById('import-status');
+      status.textContent=`✅ "${name}" importado correctamente.`;
+      status.style.display='block';
+      currentTr=key;
+      renderTabs();
+      renderTrackContainers();
+      render(key);
+      // Reset input
+      input.value='';
+      setTimeout(()=>{status.style.display='none';},4000);
+    }catch(err){
+      const status=document.getElementById('import-status');
+      status.textContent='❌ Error: archivo JSON no válido.';
+      status.style.color='#c0392b';
+      status.style.display='block';
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════
+function showScreen(id){
+  ['screen-setup','screen-permission'].forEach(s=>document.getElementById(s).classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+function showApp(){
+  ['screen-setup','screen-permission'].forEach(s=>document.getElementById(s).classList.remove('show'));
+  document.getElementById('app').style.display='block';
+  setPill('json','ok',JSON_FILE);
+  setPill('log','ok',LOG_FILE);
+  currentTr=D._order?.[0]||null;
+  // Init phOpen
+  (D._order||[]).forEach(tr=>{if(!phOpen[tr])phOpen[tr]={0:true};});
+  renderTabs();
+  renderTrackContainers();
+  if(currentTr) render(currentTr);
+  else document.getElementById('tracks-container').innerHTML=`
+    <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;background:var(--bg-card)">
+      <div class="empty-icon">🗂️</div>
+      <h3>Sin proyectos todavía</h3>
+      <p>Crea tu primer proyecto con el botón <b>＋ Nuevo proyecto</b> de arriba.</p>
+    </div>`;
+  renderLogPanel();
+  appendLog('Sesión iniciada — carpeta: '+dirHandle.name,'inicio');
+}
+function showSetup(){showScreen('screen-setup');}
+
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// ═══════════════════════════════════════════════
+//  TAB RENAME
+// ═══════════════════════════════════════════════
+function renameTab(tr, tabIdx){
+  const tabs=document.querySelectorAll('#tabs-bar .tab:not(.tab-add)');
+  const tabEl=tabs[tabIdx];
+  if(!tabEl)return;
+  const labelEl=tabEl.querySelector('.tab-label');
+  if(!labelEl)return;
+  const orig=trName(tr);
+  const inp=document.createElement('input');
+  inp.className='tab-rename-inp';
+  inp.value=orig;
+  inp.addEventListener('click',e=>e.stopPropagation());
+  labelEl.replaceWith(inp);
+  inp.focus();inp.select();
+  const sv=()=>{
+    const val=inp.value.trim()||orig;
+    if(val!==orig){
+      D._names[tr]=val;
+      scheduleJsonSave();
+      appendLog(`Proyecto renombrado: "${orig}"→"${val}"`,'renombrado');
+    }
+    renderTabs();
+  };
+  inp.addEventListener('blur',sv);
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key==='Escape'){ev.preventDefault();inp.blur();}});
+}
+
+// ═══════════════════════════════════════════════
+//  TASK NOTES
+// ═══════════════════════════════════════════════
+let _noteCtx = null; // {tr, pi, ti}
+
+function openNotes(tr,pi,ti){
+  _noteCtx={tr,pi,ti};
+  const task=D[tr].phases[pi].tasks[ti];
+  document.getElementById('notes-task-name').textContent=task.x;
+  document.getElementById('notes-text').value=task.n||'';
+  document.getElementById('notes-date').value=task.fd||'';
+  document.getElementById('notes-resp').value=task.resp||'';
+  document.getElementById('notes-link').value=task.link||'';
+  openModal('modal-notes');
+  setTimeout(()=>document.getElementById('notes-text').focus(),80);
+}
+
+function saveAndCloseNotes(){
+  if(!_noteCtx)return;
+  const {tr,pi,ti}=_noteCtx;
+  const task=D[tr].phases[pi].tasks[ti];
+  const n=document.getElementById('notes-text').value.trim();
+  const fd=document.getElementById('notes-date').value;
+  const resp=document.getElementById('notes-resp').value.trim();
+  const link=document.getElementById('notes-link').value.trim();
+  const changed = n!==(task.n||'') || fd!==(task.fd||'') || resp!==(task.resp||'') || link!==(task.link||'');
+  if(changed){
+    task.n=n||undefined;
+    task.fd=fd||undefined;
+    task.resp=resp||undefined;
+    task.link=link||undefined;
+    // Clean undefined keys
+    ['n','fd','resp','link'].forEach(k=>{if(!task[k])delete task[k];});
+    scheduleJsonSave();
+    appendLog(`${trName(tr)} · Notas actualizadas: "${task.x}"`,'notas');
+    render(tr);
+  }
+  closeModal('modal-notes');
+  _noteCtx=null;
+}
+
+function clearNotes(){
+  document.getElementById('notes-text').value='';
+  document.getElementById('notes-date').value='';
+  document.getElementById('notes-resp').value='';
+  document.getElementById('notes-link').value='';
+}
+
+function setDarkMode(on){
+  document.body.classList.toggle('dark',on);
+  localStorage.setItem('roadmap_dark', on?'1':'0');
+  const tog=document.getElementById('dark-toggle');
+  if(tog)tog.checked=on;
+}
+function initDarkMode(){
+  const saved=localStorage.getItem('roadmap_dark');
+  // Default: match system preference if no saved value
+  const prefersDark=saved!==null ? saved==='1' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setDarkMode(prefersDark);
+}
+
+// ═══════════════════════════════════════════════
+//  DARK MODE
+//  (placed before boot so initDarkMode() runs early)
+// ═══════════════════════════════════════════════
+
+function openSettings(){
+  const sel=document.getElementById('export-select');
+  sel.innerHTML=(D._order||[]).map(tr=>`<option value="${esc(tr)}">${esc(trName(tr))}</option>`).join('');
+  if(!(D._order||[]).length)sel.innerHTML='<option disabled>Sin proyectos</option>';
+  const folderEl=document.getElementById('settings-folder-name');
+  if(dirHandle)folderEl.textContent='📂 '+dirHandle.name;
+  const status=document.getElementById('import-status');
+  status.style.display='none';
+  status.style.color='#3B8BD4';
+  // Sync toggle
+  document.getElementById('dark-toggle').checked=document.body.classList.contains('dark');
+  openModal('modal-settings');
+}
+
+function setPill(which,state,label){
+  document.getElementById('pill-'+which).className='pill '+state;
+  document.getElementById('ptxt-'+which).textContent=label;
+}
+
+function sw(tr){
+  currentTr=tr;
+  renderTabs();
+  // Show only active track
+  document.querySelectorAll('.track').forEach(t=>t.classList.remove('show'));
+  const el=document.getElementById('t-'+tr);
+  if(el)el.classList.add('show');
+}
+
+function toggleLog(){
+  logOpen=!logOpen;
+  document.getElementById('log-bd').classList.toggle('o',logOpen);
+}
+
+function renderLogPanel(){
+  const bd=document.getElementById('log-bd');
+  document.getElementById('log-count').textContent=logEntries.length+' entrada'+(logEntries.length!==1?'s':'');
+  if(!logEntries.length){bd.innerHTML='<div class="log-empty">Sin cambios registrados aún</div>';return;}
+  bd.innerHTML=logEntries.slice(0,150).map(e=>
+    e.raw
+      ?`<div class="log-row"><span class="log-ts">—</span><span class="log-msg">${esc(e.raw)}</span></div>`
+      :`<div class="log-row"><span class="log-ts">${esc(e.ts)}</span><span class="log-msg">${esc(e.message)}</span><span class="log-tag">${esc(e.tag)}</span></div>`
+  ).join('');
+}
+
+function trName(tr){return D._names?.[tr]||tr;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════════════
+//  TABS RENDER
+// ═══════════════════════════════════════════════
+function renderTabs(){
+  const order=D._order||[];
+  const onlyOne=order.length<=1;
+  let h=order.map((tr,idx)=>{
+    const active=tr===currentTr;
+    return `<button class="tab${active?' active':''}" onclick="sw('${tr}')">
+      <span class="tab-label">${esc(trName(tr))}</span>
+      <span class="tab-pencil" title="Renombrar proyecto" onclick="event.stopPropagation();renameTab('${tr}',${idx})">✏</span>
+      <span class="tab-x" title="Eliminar proyecto" onclick="event.stopPropagation();confirmDeleteTrack('${tr}')" ${onlyOne?'style="display:none"':''}>✕</span>
+    </button>`;
+  }).join('');
+  h+=`<button class="tab tab-add" onclick="addTrack()">＋ Nuevo proyecto</button>`;
+  document.getElementById('tabs-bar').innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════
+//  TRACK CONTAINERS
+// ═══════════════════════════════════════════════
+function renderTrackContainers(){
+  const order=D._order||[];
+  const container=document.getElementById('tracks-container');
+  // Remove stale divs
+  const existing=new Set(Array.from(container.children).map(c=>c.id));
+  order.forEach(tr=>{
+    if(!existing.has('t-'+tr)){
+      const div=document.createElement('div');
+      div.id='t-'+tr;
+      div.className='track'+(tr===currentTr?' show':'');
+      container.appendChild(div);
+    }
+  });
+  // Remove divs for deleted tracks
+  Array.from(container.children).forEach(c=>{
+    const tr=c.id.replace('t-','');
+    if(!order.includes(tr))c.remove();
+  });
+  // Sync visibility
+  Array.from(container.children).forEach(c=>{
+    const tr=c.id.replace('t-','');
+    c.classList.toggle('show',tr===currentTr);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER TRACK
+// ═══════════════════════════════════════════════
+function render(tr){
+  if(!D||!D[tr])return;
+  if(!phOpen[tr])phOpen[tr]={0:true};
+  const phases=D[tr].phases;
+  if(!phases||phases.length===0){
+    document.getElementById('t-'+tr).innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>Sin fases todavía</h3>
+        <p>Añade tu primera fase para empezar a organizar tareas.</p>
+        <div style="margin-top:1rem">
+          <button class="apb" style="display:inline-flex;width:auto" onclick="aPh('${tr}')">+ Añadir primera fase</button>
+        </div>
+      </div>`;
+    return;
+  }
+  const total=phases.reduce((s,p)=>s+p.tasks.length,0);
+  const done=phases.reduce((s,p)=>s+p.tasks.filter(t=>t.c).length,0);
+  const pct=total?Math.round(done/total*100):0;
+  const PRIO_LABEL={n:'🔴 Urgente — clic para cambiar',s:'🟡 Próximo — clic para cambiar',l:'🔵 Futuro — clic para cambiar'};
+
+  let h=`<div class="summary">
+    <div class="sc"><div class="sc-l">Completadas</div><div class="sc-v">${done}/${total}</div></div>
+    <div class="sc"><div class="sc-l">Fases</div><div class="sc-v">${phases.length}</div></div>
+    <div class="sc"><div class="sc-l">Avance</div><div class="sc-v">${pct}%</div></div>
+  </div>`;
+
+  phases.forEach((ph,pi)=>{
+    const isO=phOpen[tr]?.[pi]||false;
+    const pd=ph.tasks.filter(t=>t.c).length;
+    const pp=ph.tasks.length?Math.round(pd/ph.tasks.length*100):0;
+    const dc={n:'dn',s:'ds',l:'dl'}[ph.d]||'dl';
+    const isFirst=pi===0, isLast=pi===phases.length-1;
+
+    h+=`<div class="phase" id="ph-${tr}-${pi}"
+        draggable="true"
+        ondragstart="phDragStart(event,'${tr}',${pi})"
+        ondragover="phDragOver(event,'${tr}',${pi})"
+        ondragleave="phDragLeave(event,'${tr}',${pi})"
+        ondrop="phDrop(event,'${tr}',${pi})"
+        ondragend="phDragEnd('${tr}')">
+      <div class="ph" onclick="tog('${tr}',${pi})">
+        <span class="phdh" title="Arrastrar" onclick="event.stopPropagation()">⠿</span>
+        <div class="ph-arrows" onclick="event.stopPropagation()">
+          <button class="ph-arr" onclick="movePh('${tr}',${pi},-1)" ${isFirst?'disabled':''}>▲</button>
+          <button class="ph-arr" onclick="movePh('${tr}',${pi},1)" ${isLast?'disabled':''}>▼</button>
+        </div>
+        <div class="dot-tip" onclick="event.stopPropagation();cycleDot('${tr}',${pi})">
+          <div class="dot ${dc}"></div>
+          <span class="tip">${PRIO_LABEL[ph.d||'l']}</span>
+        </div>
+        <span class="pl">${esc(ph.l)}</span>
+        <button class="ph-edit" title="Editar nombre de fase" onclick="event.stopPropagation();editPhName('${tr}',${pi})">✏</button>
+        <span class="ptag" title="Clic para editar etiqueta de tiempo" onclick="event.stopPropagation();editPhTag('${tr}',${pi},this)">${esc(ph.t)}</span>
+        <button class="xi" title="Eliminar fase" onclick="event.stopPropagation();dPh('${tr}',${pi})">✕</button>
+        <span class="chev ${isO?'o':''}">▶</span>
+      </div>
+      <div class="ph-hint">
+        <span>⠿ arrastra · ▲▼ orden · ● prioridad · ✏ edita nombre · clic en etiqueta edita tiempo</span>
+      </div>
+      <div class="pb ${isO?'o':''}">`;
+
+    ph.tasks.forEach((task,ti)=>{
+      const hasNotes=!!(task.n||task.fd||task.resp||task.link);
+      const today=new Date().toISOString().slice(0,10);
+      let badges='';
+      if(task.fd){
+        const overdue=task.fd<today&&!task.c;
+        badges+=`<span class="tk-badge ${overdue?'tk-badge-overdue':'tk-badge-date'}">${overdue?'⚠ ':' 📅 '}${task.fd}</span>`;
+      }
+      if(task.n) badges+=`<span class="tk-badge tk-badge-note">📝</span>`;
+      h+=`<div class="tk" draggable="true"
+          ondragstart="dragStart(event,'${tr}',${pi},${ti})"
+          ondragover="dragOver(event,this)"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="drop(event,'${tr}',${pi},${ti})"
+          ondragend="dragEnd()">
+        <span class="dh">⠿</span>
+        <div class="cb ${task.c?'ck':''}" onclick="tgD('${tr}',${pi},${ti})"></div>
+        <span class="tx ${task.c?'done':''}" ondblclick="eT('${tr}',${pi},${ti},'x',this)">${esc(task.x)}</span>
+        ${badges?`<div class="tk-badges">${badges}</div>`:''}
+        <button class="tk-note-btn ${hasNotes?'has-notes':''}" title="${hasNotes?'Ver notas':'Añadir notas'}" onclick="openNotes('${tr}',${pi},${ti})">📝</button>
+        <span class="tg" ondblclick="eT('${tr}',${pi},${ti},'g',this)">${esc(task.g)}</span>
+        <button class="xi" onclick="dT('${tr}',${pi},${ti})">✕</button>
+      </div>`;
+    });
+
+    h+=`<div class="ar">
+      <input class="ai" id="ni-${tr}-${pi}" placeholder="Nueva tarea…" onkeydown="if(event.key==='Enter')aT('${tr}',${pi})">
+      <input class="ati" id="ng-${tr}-${pi}" value="acción" placeholder="etiqueta" onkeydown="if(event.key==='Enter')aT('${tr}',${pi})">
+      <button class="ab" onclick="aT('${tr}',${pi})">+ Añadir</button>
+    </div>
+    <div class="bo"><div class="bi" style="width:${pp}%"></div></div>
+    </div></div>`;
+  });
+
+  h+=`<button class="apb" onclick="aPh('${tr}')">+ Añadir nueva fase</button>`;
+  document.getElementById('t-'+tr).innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════
+//  TASK ACTIONS
+// ═══════════════════════════════════════════════
+function tog(tr,pi){phOpen[tr][pi]=!phOpen[tr][pi];render(tr);}
+
+function cycleDot(tr,pi){
+  const o=['n','s','l'],c=D[tr].phases[pi].d||'n',next=o[(o.indexOf(c)+1)%3];
+  const lbl={n:'🔴 Urgente',s:'🟡 Próximo',l:'🔵 Futuro'};
+  D[tr].phases[pi].d=next;scheduleJsonSave();
+  appendLog(`${trName(tr)} · "${D[tr].phases[pi].l}" → prioridad ${lbl[next]}`,'prioridad');
+  render(tr);
+}
+
+function tgD(tr,pi,ti){
+  const t=D[tr].phases[pi].tasks[ti];t.c=!t.c;scheduleJsonSave();
+  appendLog(`${trName(tr)} · "${t.x}" → ${t.c?'✅ completada':'⬜ desmarcada'}`,t.c?'completada':'desmarcada');
+  render(tr);
+}
+
+function dT(tr,pi,ti){
+  const name=D[tr].phases[pi].tasks[ti].x;
+  D[tr].phases[pi].tasks.splice(ti,1);scheduleJsonSave();
+  appendLog(`${trName(tr)} · Tarea eliminada: "${name}"`,'eliminada');
+  render(tr);
+}
+
+function aT(tr,pi){
+  const ni=document.getElementById(`ni-${tr}-${pi}`),ng=document.getElementById(`ng-${tr}-${pi}`);
+  const x=ni.value.trim();if(!x){ni.focus();return;}
+  const g=ng.value.trim()||'acción';
+  D[tr].phases[pi].tasks.push({x,g,c:false});scheduleJsonSave();
+  appendLog(`${trName(tr)} · Nueva tarea en "${D[tr].phases[pi].l}": "${x}" [${g}]`,'añadida');
+  render(tr);
+  setTimeout(()=>{const e=document.getElementById(`ni-${tr}-${pi}`);if(e)e.focus();},40);
+}
+
+function dPh(tr,pi){
+  if(D[tr].phases.length<=1)return;
+  const name=D[tr].phases[pi].l;
+  if(!confirm(`¿Eliminar la fase "${name}" y todas sus tareas?`))return;
+  D[tr].phases.splice(pi,1);scheduleJsonSave();
+  appendLog(`${trName(tr)} · Fase eliminada: "${name}"`,'fase-eliminada');
+  render(tr);
+}
+
+function aPh(tr){
+  const pi=D[tr].phases.length;
+  D[tr].phases.push({l:'Nueva fase',d:'l',t:'pendiente',tasks:[]});
+  if(!phOpen[tr])phOpen[tr]={};
+  phOpen[tr][pi]=true;scheduleJsonSave();
+  appendLog(`${trName(tr)} · Nueva fase añadida`,'fase-nueva');
+  render(tr);
+}
+
+function eT(tr,pi,ti,field,span){
+  const task=D[tr].phases[pi].tasks[ti],orig=task[field],isG=field==='g';
+  const inp=document.createElement('input');inp.className=isG?'tg-inp':'tx-inp';inp.value=orig;
+  span.replaceWith(inp);inp.focus();inp.select();
+  const sv=()=>{
+    const val=inp.value.trim()||orig;
+    if(val!==orig){task[field]=val;scheduleJsonSave();
+      appendLog(isG?`${trName(tr)} · Etiqueta: "${orig}"→"${val}"`:`${trName(tr)} · Tarea editada: "${orig}"→"${val}"`,'editada');}
+    render(tr);
+  };
+  inp.addEventListener('blur',sv);
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key==='Escape'){ev.preventDefault();sv();}});
+}
+
+function editPhName(tr,pi){
+  const container=document.getElementById(`ph-${tr}-${pi}`);
+  if(!container)return;
+  const span=container.querySelector('.pl');
+  if(span)rPh(tr,pi,span);
+}
+function editPhTag(tr,pi,span){rTag(tr,pi,span);}
+
+function rPh(tr,pi,span){
+  const ph=D[tr].phases[pi],orig=ph.l;
+  const inp=document.createElement('input');inp.className='pl-inp';inp.value=orig;
+  span.replaceWith(inp);inp.focus();inp.select();
+  const sv=()=>{
+    const val=inp.value.trim()||orig;
+    if(val!==orig){ph.l=val;scheduleJsonSave();
+      appendLog(`${trName(tr)} · Fase renombrada: "${orig}"→"${val}"`,'renombrada');}
+    render(tr);
+  };
+  inp.addEventListener('blur',sv);
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key==='Escape'){ev.preventDefault();sv();}});
+}
+
+function rTag(tr,pi,span){
+  const ph=D[tr].phases[pi],orig=ph.t;
+  const inp=document.createElement('input');inp.className='ptag-inp';inp.value=orig;
+  span.replaceWith(inp);inp.focus();inp.select();
+  const sv=()=>{
+    const val=inp.value.trim()||orig;
+    if(val!==orig){ph.t=val;scheduleJsonSave();
+      appendLog(`${trName(tr)} · Etiqueta de fase: "${orig}"→"${val}"`,'etiqueta');}
+    render(tr);
+  };
+  inp.addEventListener('blur',sv);
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key==='Escape'){ev.preventDefault();sv();}});
+}
+
+// ═══════════════════════════════════════════════
+//  TASK DRAG & DROP
+// ═══════════════════════════════════════════════
+function dragStart(e,tr,pi,ti){
+  if(phDragSrc)return;
+  dragSrc={tr,pi,ti};
+  e.dataTransfer.effectAllowed='move';
+  e.stopPropagation();
+  setTimeout(()=>e.target.classList.add('dragging'),0);
+}
+function dragOver(e,el){
+  if(phDragSrc)return;
+  e.preventDefault();
+  document.querySelectorAll('.tk').forEach(x=>x.classList.remove('drag-over'));
+  el.classList.add('drag-over');
+}
+function dragEnd(){document.querySelectorAll('.tk').forEach(x=>x.classList.remove('dragging','drag-over'));}
+function drop(e,tr,pi,ti){
+  if(phDragSrc)return;
+  e.preventDefault();e.stopPropagation();
+  document.querySelectorAll('.tk').forEach(x=>x.classList.remove('drag-over','dragging'));
+  if(!dragSrc||dragSrc.tr!==tr||dragSrc.pi!==pi||dragSrc.ti===ti)return;
+  const tasks=D[tr].phases[pi].tasks,moved=tasks[dragSrc.ti].x;
+  const[item]=tasks.splice(dragSrc.ti,1);tasks.splice(ti,0,item);
+  dragSrc=null;scheduleJsonSave();
+  appendLog(`${trName(tr)} · Tarea reordenada: "${moved}"`,'reorden');
+  render(tr);
+}
+
+// ═══════════════════════════════════════════════
+//  PHASE DRAG & DROP
+// ═══════════════════════════════════════════════
+function phDragStart(e,tr,pi){
+  phDragSrc={tr,pi};
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',`ph:${tr}:${pi}`);
+  setTimeout(()=>{const el=document.getElementById(`ph-${tr}-${pi}`);if(el)el.classList.add('ph-dragging');},0);
+}
+function phDragOver(e,tr,pi){
+  if(!phDragSrc||phDragSrc.tr!==tr||phDragSrc.pi===pi)return;
+  e.preventDefault();e.stopPropagation();
+  document.querySelectorAll(`#t-${tr} .phase`).forEach(el=>el.classList.remove('ph-drag-over-top','ph-drag-over-bot'));
+  const el=document.getElementById(`ph-${tr}-${pi}`);if(!el)return;
+  const rect=el.getBoundingClientRect(),mid=rect.top+rect.height/2;
+  el.classList.add(e.clientY<mid?'ph-drag-over-top':'ph-drag-over-bot');
+}
+function phDragLeave(e,tr,pi){
+  const el=document.getElementById(`ph-${tr}-${pi}`);
+  if(el)el.classList.remove('ph-drag-over-top','ph-drag-over-bot');
+}
+function phDrop(e,tr,pi){
+  if(!phDragSrc||phDragSrc.tr!==tr)return;
+  e.preventDefault();e.stopPropagation();
+  const fromPi=phDragSrc.pi;
+  if(fromPi===pi){phDragEnd(tr);return;}
+  const el=document.getElementById(`ph-${tr}-${pi}`);
+  let insertBefore=pi;
+  if(el){const rect=el.getBoundingClientRect(),mid=rect.top+rect.height/2;if(e.clientY>=mid)insertBefore=pi+1;}
+  const phases=D[tr].phases;
+  const[moved]=phases.splice(fromPi,1);
+  const idx=insertBefore>fromPi?insertBefore-1:insertBefore;
+  phases.splice(idx,0,moved);
+  // Update phOpen
+  const newOpen={};
+  if(phOpen[tr]){
+    Object.keys(phOpen[tr]).forEach(k=>{
+      const o=parseInt(k);let n;
+      if(o===fromPi)n=idx;
+      else if(fromPi<idx)n=o>fromPi&&o<=idx?o-1:o;
+      else n=o>=idx&&o<fromPi?o+1:o;
+      newOpen[n]=phOpen[tr][k];
+    });
+    phOpen[tr]=newOpen;
+  }
+  scheduleJsonSave();
+  appendLog(`${trName(tr)} · Fase reordenada: "${moved.l}"`,'fase-reorden');
+  phDragSrc=null;
+  render(tr);
+}
+function phDragEnd(tr){
+  document.querySelectorAll(`#t-${tr} .phase`).forEach(el=>el.classList.remove('ph-dragging','ph-drag-over-top','ph-drag-over-bot'));
+  phDragSrc=null;
+}
+
+function movePh(tr,pi,dir){
+  const phases=D[tr].phases,newPi=pi+dir;
+  if(newPi<0||newPi>=phases.length)return;
+  [phases[pi],phases[newPi]]=[phases[newPi],phases[pi]];
+  if(phOpen[tr]){const tmp=phOpen[tr][pi];phOpen[tr][pi]=phOpen[tr][newPi];phOpen[tr][newPi]=tmp;}
+  scheduleJsonSave();
+  appendLog(`${trName(tr)} · Fase movida: "${phases[newPi].l}" → posición ${newPi+1}`,'fase-reorden');
+  render(tr);
+}
+
+// ═══════════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════════
+initDarkMode();
+boot();
+</script>
+</body>
+</html>
