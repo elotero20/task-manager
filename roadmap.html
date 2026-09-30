@@ -218,6 +218,10 @@ body.dark .tk-badge-date{background:#0d1f35;border-color:#2a5a9a;color:#80b0e0}
 body.dark .tk-badge-note{background:#2a2010;border-color:#7a5a00;color:#d0a820}
 .tk-badge-overdue{background:#fff0f0;border-color:#f09090;color:#8a2020}
 body.dark .tk-badge-overdue{background:#2d1010;border-color:#8a2020;color:#e08080}
+.tk-badge-wait{background:#f3f1fb;border-color:#b8b0e0;color:#4a3f8a}
+body.dark .tk-badge-wait{background:#1c1a2e;border-color:#4a3f8a;color:#b0a8e8}
+.tk-badge-stale{background:#fff3e0;border-color:#e8a040;color:#8a4a00;font-weight:600}
+body.dark .tk-badge-stale{background:#2e1f0a;border-color:#8a5a10;color:#f0b060}
 
 /* ── Notes modal ── */
 .notes-modal .card{max-width:520px}
@@ -314,6 +318,16 @@ body.dark .toast button{color:#1a5a9a}
       </div>
     </div>
 
+    <!-- Seguimientos -->
+    <div class="sett-section">
+      <h3>⏳ Seguimientos</h3>
+      <p>Una tarea "esperando a…" se marca en naranja (toca insistir) cuando pasan estos días desde el último contacto.</p>
+      <div class="sett-row">
+        <input class="sett-select" type="number" min="1" max="90" id="wait-days" style="flex:0 0 90px;cursor:text" onchange="setWaitDays(this.value)">
+        <span style="font-size:12px;color:var(--text-muted)">días</span>
+      </div>
+    </div>
+
     <!-- Exportar -->
     <div class="sett-section">
       <h3>📤 Exportar proyecto</h3>
@@ -391,6 +405,19 @@ body.dark .toast button{color:#1a5a9a}
         <div class="notes-field">
           <label>👤 Responsable</label>
           <input class="notes-input" type="text" id="notes-resp" placeholder="Ej: Yo, proveedor…">
+        </div>
+      </div>
+      <div class="notes-grid">
+        <div class="notes-field">
+          <label>⏳ Esperando a</label>
+          <input class="notes-input" type="text" id="notes-wait" placeholder="Quién tiene que responder">
+        </div>
+        <div class="notes-field">
+          <label>🗓 Último contacto</label>
+          <div style="display:flex;gap:6px">
+            <input class="notes-input" type="date" id="notes-waitdate">
+            <button class="btn btn-secondary btn-sm" type="button" title="Hoy volví a contactar" onclick="document.getElementById('notes-waitdate').value=localISO()">Hoy</button>
+          </div>
         </div>
       </div>
       <div class="notes-field">
@@ -839,6 +866,8 @@ function openNotes(tr,pi,ti){
   document.getElementById('notes-date').value=task.fd||'';
   document.getElementById('notes-resp').value=task.resp||'';
   document.getElementById('notes-link').value=task.link||'';
+  document.getElementById('notes-wait').value=task.w||'';
+  document.getElementById('notes-waitdate').value=task.wd||'';
   openModal('modal-notes');
   setTimeout(()=>document.getElementById('notes-text').focus(),80);
 }
@@ -851,16 +880,22 @@ function saveAndCloseNotes(){
   const fd=document.getElementById('notes-date').value;
   const resp=document.getElementById('notes-resp').value.trim();
   const link=document.getElementById('notes-link').value.trim();
-  const changed = n!==(task.n||'') || fd!==(task.fd||'') || resp!==(task.resp||'') || link!==(task.link||'');
+  const w=document.getElementById('notes-wait').value.trim();
+  // Sin fecha de contacto explícita, se asume que la espera empieza hoy
+  const wd=w?(document.getElementById('notes-waitdate').value||localISO()):'';
+  const waitChanged = w!==(task.w||'') || wd!==(task.wd||'');
+  const changed = n!==(task.n||'') || fd!==(task.fd||'') || resp!==(task.resp||'') || link!==(task.link||'') || waitChanged;
   if(changed){
-    task.n=n||undefined;
-    task.fd=fd||undefined;
-    task.resp=resp||undefined;
-    task.link=link||undefined;
-    // Clean undefined keys
-    ['n','fd','resp','link'].forEach(k=>{if(!task[k])delete task[k];});
+    const prevW=task.w||'';
+    Object.assign(task,{n,fd,resp,link,w,wd});
+    // Clean empty keys
+    ['n','fd','resp','link','w','wd'].forEach(k=>{if(!task[k])delete task[k];});
     scheduleJsonSave();
-    appendLog(`${trName(tr)} · Notas actualizadas: "${task.x}"`,'notas');
+    if(waitChanged){
+      if(!w)appendLog(`${trName(tr)} · Ya no espera a ${prevW}: "${task.x}"`,'esperando');
+      else if(w!==prevW)appendLog(`${trName(tr)} · Esperando a ${w}: "${task.x}"`,'esperando');
+      else appendLog(`${trName(tr)} · Seguimiento con ${w} (${wd}): "${task.x}"`,'seguimiento');
+    }else appendLog(`${trName(tr)} · Notas actualizadas: "${task.x}"`,'notas');
     render(tr);
   }
   closeModal('modal-notes');
@@ -872,6 +907,49 @@ function clearNotes(){
   document.getElementById('notes-date').value='';
   document.getElementById('notes-resp').value='';
   document.getElementById('notes-link').value='';
+  document.getElementById('notes-wait').value='';
+  document.getElementById('notes-waitdate').value='';
+}
+
+// ═══════════════════════════════════════════════
+//  SEGUIMIENTOS ("esperando a…")
+// ═══════════════════════════════════════════════
+function waitDays(){return D?._settings?.waitDays||7;}
+function setWaitDays(v){
+  const n=Math.max(1,Math.min(90,parseInt(v,10)||7));
+  document.getElementById('wait-days').value=n;
+  if(n===waitDays())return;
+  D._settings={...D._settings,waitDays:n};scheduleJsonSave();
+  appendLog(`Ajustes · Insistir tras ${n} días sin respuesta`,'ajustes');
+  if(currentTr)render(currentTr);
+}
+function daysSince(iso){
+  if(!iso)return null;
+  const [y,m,d]=iso.split('-').map(Number);
+  const t=new Date();t.setHours(0,0,0,0);
+  return Math.round((t-new Date(y,m-1,d))/86400000);
+}
+function isStale(task){const ds=daysSince(task.wd);return !!task.w&&!task.c&&ds!==null&&ds>=waitDays();}
+function followUp(tr,pi,ti){
+  const task=D[tr].phases[pi].tasks[ti];
+  task.wd=localISO();scheduleJsonSave();
+  appendLog(`${trName(tr)} · Seguimiento con ${task.w} (${task.wd}): "${task.x}"`,'seguimiento');
+  render(tr);
+}
+
+function taskBadges(task,today){
+  let b='';
+  if(task.fd){
+    const overdue=task.fd<today&&!task.c;
+    b+=`<span class="tk-badge ${overdue?'tk-badge-overdue':'tk-badge-date'}">${overdue?'⚠ ':'📅 '}${esc(task.fd)}</span>`;
+  }
+  if(task.w&&!task.c){
+    const ds=daysSince(task.wd);
+    const tip=`Esperando a ${task.w}`+(ds!==null?` · último contacto hace ${ds} día${ds===1?'':'s'}`:'')+(isStale(task)?' · toca insistir':'');
+    b+=`<span class="tk-badge ${isStale(task)?'tk-badge-stale':'tk-badge-wait'}" title="${esc(tip)}">⏳ ${esc(task.w)}${ds!==null?' · '+ds+'d':''}</span>`;
+  }
+  if(task.n)b+=`<span class="tk-badge tk-badge-note">📝</span>`;
+  return b;
 }
 
 function setDarkMode(on){
@@ -903,6 +981,7 @@ function openSettings(){
   status.style.color='#3B8BD4';
   // Sync toggle
   document.getElementById('dark-toggle').checked=document.body.classList.contains('dark');
+  document.getElementById('wait-days').value=waitDays();
   openModal('modal-settings');
 }
 
@@ -1054,13 +1133,8 @@ function render(tr){
 
     const today=localISO();
     ph.tasks.forEach((task,ti)=>{
-      const hasNotes=!!(task.n||task.fd||task.resp||task.link);
-      let badges='';
-      if(task.fd){
-        const overdue=task.fd<today&&!task.c;
-        badges+=`<span class="tk-badge ${overdue?'tk-badge-overdue':'tk-badge-date'}">${overdue?'⚠ ':' 📅 '}${task.fd}</span>`;
-      }
-      if(task.n) badges+=`<span class="tk-badge tk-badge-note">📝</span>`;
+      const hasNotes=!!(task.n||task.fd||task.resp||task.link||task.w);
+      const badges=taskBadges(task,today);
       h+=`<div class="tk" draggable="true"
           ondragstart="dragStart(event,'${tr}',${pi},${ti})"
           ondragover="dragOver(event,this)"
