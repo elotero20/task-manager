@@ -1,0 +1,942 @@
+<title>Roadmap Alberto Otero</title>
+<style>
+/* Layout: una columna de trabajo (máx. 920px) — pestañas arriba, "Esta semana" como inicio, historial al pie.
+   Misma estética que la versión local (roadmap.html), pasada a tokens con tema claro/oscuro del visor. */
+:root{
+  --bg-page:#f5f4f0; --bg-card:#fff; --bg-head:#f8f7f3; --bg-hover:#f0efe9; --bg-input:#f5f4f0;
+  --text:#1a1a18; --text-sub:#555; --text-muted:#888780; --text-faint:#a8a69e;
+  --border:#e8e6e0; --border-sub:#d3d1c7; --border-faint:#f0efe9; --shadow:rgba(0,0,0,.12);
+  --accent:#3B8BD4; --star:#EF9F27; --overlay:rgba(0,0,0,.45);
+  --ok-bg:#f0f8f0; --ok-bd:#90c090; --ok-fg:#2a6a2a; --ok-dot:#50b050;
+  --info-bg:#f0f8ff; --info-bd:#90c0f0; --info-fg:#1a5a9a; --info-dot:#5080f0;
+  --err-bg:#fff0f0; --err-bd:#f09090; --err-fg:#8a2020; --err-dot:#e05050; --danger:#c0392b;
+  --note-bg:#fff8e8; --note-bd:#e0c060; --note-fg:#7a5a00;
+  --wait-bg:#f3f1fb; --wait-bd:#b8b0e0; --wait-fg:#4a3f8a;
+  --stale-bg:#fff3e0; --stale-bd:#e8a040; --stale-fg:#8a4a00;
+  --toast-link:#7fb8f0; --alert-num:#c0392b; --warn-num:#b86a00;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg-page:#141416; --bg-card:#1e1e22; --bg-head:#252529; --bg-hover:#2d2d32; --bg-input:#2a2a2f;
+  --text:#e8e6e0; --text-sub:#bbb; --text-muted:#8a8a92; --text-faint:#66666e;
+  --border:#333338; --border-sub:#44444a; --border-faint:#2a2a2f; --shadow:rgba(0,0,0,.4);
+  --overlay:rgba(0,0,0,.6);
+  --ok-bg:#0d2e0d; --ok-bd:#2a5a2a; --ok-fg:#80d080;
+  --info-bg:#0d1f35; --info-bd:#2a5a9a; --info-fg:#80b0e0;
+  --err-bg:#2d1010; --err-bd:#8a2020; --err-fg:#e08080; --danger:#e06050;
+  --note-bg:#2a2010; --note-bd:#7a5a00; --note-fg:#d0a820;
+  --wait-bg:#1c1a2e; --wait-bd:#4a3f8a; --wait-fg:#b0a8e8;
+  --stale-bg:#2e1f0a; --stale-bd:#8a5a10; --stale-fg:#f0b060;
+  --toast-link:#1a5a9a; --alert-num:#e08080; --warn-num:#f0b060;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg-page:#141416; --bg-card:#1e1e22; --bg-head:#252529; --bg-hover:#2d2d32; --bg-input:#2a2a2f;
+  --text:#e8e6e0; --text-sub:#bbb; --text-muted:#8a8a92; --text-faint:#66666e;
+  --border:#333338; --border-sub:#44444a; --border-faint:#2a2a2f; --shadow:rgba(0,0,0,.4);
+  --overlay:rgba(0,0,0,.6);
+  --ok-bg:#0d2e0d; --ok-bd:#2a5a2a; --ok-fg:#80d080;
+  --info-bg:#0d1f35; --info-bd:#2a5a9a; --info-fg:#80b0e0;
+  --err-bg:#2d1010; --err-bd:#8a2020; --err-fg:#e08080; --danger:#e06050;
+  --note-bg:#2a2010; --note-bd:#7a5a00; --note-fg:#d0a820;
+  --wait-bg:#1c1a2e; --wait-bd:#4a3f8a; --wait-fg:#b0a8e8;
+  --stale-bg:#2e1f0a; --stale-bd:#8a5a10; --stale-fg:#f0b060;
+  --toast-link:#1a5a9a; --alert-num:#e08080; --warn-num:#f0b060;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg-page);color:var(--text);margin:0}
+.wrap{max-width:920px;margin:0 auto;padding-inline:16px;padding-block:20px 80px}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* ── Top bar ── */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.2rem}
+.topbar h1{font-size:1.15rem;font-weight:700;margin:0 0 2px;text-wrap:balance}
+.topbar p{font-size:12px;color:var(--text-muted);margin:0;line-height:1.5}
+.topbar-l{min-width:0;flex:1 1 300px}
+.topbar-r{display:flex;gap:6px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid;white-space:nowrap}
+.pill-dot{width:6px;height:6px;border-radius:50%}
+.pill.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-fg)}.pill.ok .pill-dot{background:var(--ok-dot)}
+.pill.saving{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-fg)}.pill.saving .pill-dot{background:var(--info-dot);animation:blink .7s infinite}
+.pill.err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-fg)}.pill.err .pill-dot{background:var(--err-dot)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── Buttons ── */
+.btn{padding:8px 16px;font-size:13px;border-radius:8px;border:1px solid;cursor:pointer;transition:background .15s,border-color .15s;white-space:nowrap;font-weight:500}
+.btn-primary{background:var(--text);color:var(--bg-card);border-color:var(--text)}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{background:var(--bg-card);color:var(--text-sub);border-color:var(--border-sub)}
+.btn-secondary:hover{background:var(--bg-hover)}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-ghost{background:transparent;color:var(--text-muted);border-color:transparent;font-size:12px;padding:6px 10px}
+.btn-ghost:hover{background:var(--bg-hover);color:var(--text)}
+.btn-sm{padding:5px 11px;font-size:12px}
+
+/* ── Tabs ── */
+.tabs-bar{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{display:inline-flex;align-items:center;gap:5px;padding:6px 10px 6px 14px;font-size:13px;border-radius:8px;border:1px solid var(--border-sub);background:var(--bg-card);color:var(--text-muted);cursor:pointer;max-width:100%}
+.tab.active{color:var(--text);border-color:var(--text-muted);font-weight:600;box-shadow:0 1px 4px var(--shadow)}
+.tab-week{padding:6px 14px}
+.tab-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.tab-ic{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0}
+.tab-ic:hover{background:var(--bg-hover);color:var(--text)}
+.tab-ic.x:hover{background:var(--err-bg);color:var(--err-fg)}
+.tab-add{border-style:dashed;color:var(--text-faint);padding:6px 13px}
+.tab-add:hover{color:var(--text);background:var(--bg-hover)}
+.tab-rename{font-size:13px;background:transparent;border:none;border-bottom:1.5px solid var(--accent);outline:none;color:var(--text);width:150px;padding:0;font-weight:600}
+
+/* ── Summary ── */
+.view{display:none}.view.show{display:block}
+.summary{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.sc{background:var(--bg-card);border-radius:8px;padding:10px 14px;flex:1;min-width:110px;border:1px solid var(--border)}
+.sc-l{font-size:11px;color:var(--text-muted);margin-bottom:2px}
+.sc-v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.sc.alert .sc-v{color:var(--alert-num)}
+.sc.warn .sc-v{color:var(--warn-num)}
+
+/* ── Phase ── */
+.phase{margin-bottom:.9rem;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-card)}
+.phase.ph-dragging{opacity:.35}
+.phase.ph-over-top{border-top:3px solid var(--accent)}
+.phase.ph-over-bot{border-bottom:3px solid var(--accent)}
+.ph{display:flex;align-items:center;gap:6px;padding:10px 13px;background:var(--bg-head);cursor:pointer;border-bottom:1px solid var(--border);user-select:none}
+.ph:hover{background:var(--bg-hover)}
+.phdh{color:var(--border-sub);cursor:grab;font-size:14px;padding:0 2px}
+.ph-arrows{display:flex;flex-direction:column;gap:1px}
+.ph-arr{width:18px;height:14px;border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:9px;padding:0;border-radius:2px}
+.ph-arr:hover{background:var(--border);color:var(--text-sub)}
+.ph-arr:disabled{opacity:.2;cursor:default}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;cursor:pointer;border:none;padding:0}
+.dn{background:#E85D24}.ds{background:#EF9F27}.dl{background:#3B8BD4}
+.pl{font-size:13px;font-weight:600;flex:1;min-width:0;word-break:break-word}
+.pl-inp{font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:2px solid var(--accent);outline:none;flex:1;color:var(--text);min-width:0}
+.ptag{font-size:11px;color:var(--text-muted);padding:2px 8px;border:1px solid var(--border);border-radius:20px;white-space:nowrap;cursor:text;background:transparent}
+.ptag:hover{background:var(--bg-hover)}
+.ptag-inp{font-size:11px;color:var(--text-muted);background:var(--bg-card);border:1px solid var(--accent);border-radius:20px;padding:2px 8px;outline:none;width:110px}
+.chev{font-size:10px;color:var(--text-faint);transition:transform .18s}
+.chev.o{transform:rotate(90deg)}
+.pb{display:none;padding:10px 13px}.pb.o{display:block}
+.ic{width:22px;height:22px;border-radius:4px;border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1}
+.ic:hover{background:var(--bg-hover);color:var(--text)}
+.ic.del:hover{background:var(--err-bg);color:var(--err-fg)}
+.hov{opacity:0;transition:opacity .12s}
+.ph:hover .hov,.tk:hover .hov{opacity:1}
+@media (hover: none){.hov{opacity:1}.phdh,.dh{display:none}}
+
+/* ── Tasks ── */
+.tk{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border-faint)}
+.tk:last-of-type{border-bottom:none}
+.tk.dragging{opacity:.3}.tk.drag-over{border-top:2px solid var(--accent)}
+.tk.flash{animation:flash 1.8s ease-out}
+@keyframes flash{0%,30%{background:var(--info-bg)}100%{background:transparent}}
+.dh{color:var(--border-sub);cursor:grab;font-size:13px;margin-top:2px}
+.cb{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border-sub);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:transparent;padding:0}
+.cb.ck{background:var(--accent);border-color:var(--accent)}
+.cb.ck::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
+.tx{font-size:13px;line-height:1.45;flex:1;min-width:0;cursor:text;word-break:break-word}
+.tx.done{color:var(--text-faint);text-decoration:line-through}
+.tx-inp{font-size:13px;background:transparent;border:none;border-bottom:1.5px solid var(--accent);outline:none;color:var(--text);flex:1;padding:0;min-width:0}
+.tg{font-size:10px;color:var(--text-muted);background:var(--bg-input);border-radius:20px;padding:2px 8px;border:1px solid var(--border);white-space:nowrap;flex-shrink:0;cursor:text}
+.tg-inp{font-size:10px;color:var(--text-muted);background:var(--bg-input);border:1px solid var(--accent);border-radius:20px;padding:2px 8px;outline:none;width:80px}
+.star.on{opacity:1;color:var(--star)}
+.star:hover{color:var(--star)}
+.note.has{opacity:1;color:var(--accent)}
+.badges{display:flex;gap:4px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.bdg{font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid;white-space:nowrap;font-variant-numeric:tabular-nums}
+.b-date{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-fg)}
+.b-over{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-fg)}
+.b-note{background:var(--note-bg);border-color:var(--note-bd);color:var(--note-fg)}
+.b-wait{background:var(--wait-bg);border-color:var(--wait-bd);color:var(--wait-fg)}
+.b-stale{background:var(--stale-bg);border-color:var(--stale-bd);color:var(--stale-fg);font-weight:600}
+.ar{display:flex;gap:6px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);flex-wrap:wrap}
+.ai{font-size:13px;flex:1 1 160px;background:transparent;border:none;border-bottom:1.5px solid var(--border);outline:none;padding:4px 0;color:var(--text);min-width:0}
+.ai:focus{border-bottom-color:var(--accent)}
+.ati{font-size:11px;width:84px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;padding:3px 8px;outline:none;color:var(--text-muted)}
+.ab{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid var(--border-sub);background:var(--bg-card);color:var(--text-muted);cursor:pointer;white-space:nowrap}
+.ab:hover{background:var(--bg-hover);color:var(--text)}
+.bo{height:3px;background:var(--border-faint);border-radius:2px;margin-top:10px}
+.bi{height:100%;border-radius:2px;background:var(--accent);transition:width .35s}
+.apb{display:flex;align-items:center;gap:6px;width:100%;padding:9px 13px;border-radius:12px;border:1px dashed var(--border-sub);background:transparent;color:var(--text-faint);cursor:pointer;font-size:13px}
+.apb:hover{background:var(--bg-hover);color:var(--text)}
+
+/* ── Esta semana ── */
+.quick{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 13px;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);margin-bottom:.9rem}
+.quick input{flex:1 1 220px;min-width:0;font-size:14px;padding:7px 0;border:none;border-bottom:1.5px solid var(--border);background:transparent;color:var(--text);outline:none}
+.quick input:focus{border-bottom-color:var(--accent)}
+.quick select{flex:0 1 260px;min-width:0;font-size:12px;padding:6px 8px;border:1px solid var(--border-sub);border-radius:8px;background:var(--bg-card);color:var(--text)}
+.wk-sec{margin-bottom:.9rem;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);overflow:hidden}
+.wk-hd{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--bg-head);border-bottom:1px solid var(--border);font-size:13px;font-weight:600}
+.wk-n{margin-left:auto;font-size:11px;font-weight:400;color:var(--text-muted)}
+.wk-bd{padding:2px 13px}
+.wk-proj{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;padding:10px 0 2px}
+.wk-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border-faint)}
+.wk-row:last-child{border-bottom:none}
+.wk-main{flex:1;min-width:0}
+.wk-tx{font-size:13px;line-height:1.45;cursor:pointer;word-break:break-word;background:none;border:none;padding:0;color:var(--text);text-align:left}
+.wk-tx:hover{color:var(--accent);text-decoration:underline}
+.wk-meta{font-size:11px;color:var(--text-faint);margin-top:1px}
+.wk-sug{font-style:italic}
+.wk-row .hov{opacity:1}
+.wk-empty{font-size:12px;color:var(--text-faint);padding:10px 0;line-height:1.5}
+
+/* ── Log ── */
+.log{margin-top:1.4rem;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-card)}
+.log-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:var(--bg-head);cursor:pointer;width:100%;border:none;color:var(--text);font-size:13px;font-weight:600;text-align:left}
+.log-hd span{font-size:11px;color:var(--text-faint);font-weight:400}
+.log-bd{max-height:240px;overflow-y:auto}
+.log-row{display:flex;gap:10px;align-items:baseline;padding:6px 13px;border-bottom:1px solid var(--border-faint);font-size:12px;flex-wrap:wrap}
+.log-ts{color:var(--text-faint);white-space:nowrap;font-size:11px;font-variant-numeric:tabular-nums}
+.log-msg{color:var(--text-sub);flex:1 1 200px;min-width:0;line-height:1.4;word-break:break-word}
+.log-tag{font-size:10px;padding:1px 6px;border-radius:20px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted)}
+
+/* ── Empty / estado ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--text-muted);border:1px solid var(--border);border-radius:12px;background:var(--bg-card)}
+.empty h3{font-size:1rem;color:var(--text);margin:0 0 .4rem}
+.empty p{font-size:13px;line-height:1.6;margin:0 auto;max-width:46ch}
+
+/* ── Modales ── */
+.overlay{position:fixed;inset:0;background:var(--overlay);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--bg-card);border-radius:16px;padding:1.5rem;max-width:520px;width:100%;box-shadow:0 4px 30px var(--shadow);border:1px solid var(--border);max-height:calc(100% - 32px);overflow-y:auto}
+.card h2{font-size:1.05rem;margin:0 0 .6rem}
+.card p{font-size:13px;color:var(--text-sub);line-height:1.6;margin:0 0 .75rem}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.1rem;justify-content:flex-end}
+.fields{display:grid;gap:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.35rem}
+.inp,.ta{width:100%;font-size:13px;padding:7px 12px;border:1px solid var(--border-sub);border-radius:8px;background:var(--bg-card);color:var(--text);outline:none}
+.inp:focus,.ta:focus{border-color:var(--accent)}
+.ta{resize:vertical;min-height:84px;line-height:1.5}
+.row{display:flex;gap:6px}
+.sett{border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem}
+.sett:first-of-type{border-top:none;padding-top:0;margin-top:0}
+.sett h3{font-size:13px;margin:0 0 .35rem}
+.sett p{font-size:12px;color:var(--text-muted)}
+.danger-note{font-size:12px;color:var(--err-fg);background:var(--err-bg);border:1px solid var(--err-bd);border-radius:8px;padding:8px 12px;line-height:1.5}
+.linkbtn{font-size:11px;color:var(--text-faint);background:transparent;border:none;cursor:pointer;padding:0;text-decoration:underline;margin-right:auto}
+.linkbtn:hover{color:var(--danger)}
+.status-msg{font-size:12px;color:var(--accent);margin-top:.5rem}
+
+/* ── Toast ── */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translate(-50%,16px);background:var(--text);color:var(--bg-card);padding:10px 14px;border-radius:10px;font-size:13px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:400;box-shadow:0 6px 24px var(--shadow);max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast-msg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.toast button{background:transparent;border:none;color:var(--toast-link);font-weight:700;cursor:pointer;padding:0;flex-shrink:0;font-size:13px}
+
+@media (max-width:520px){
+  .sc{min-width:calc(50% - 4px)}
+  .grid2{grid-template-columns:1fr}
+  .wk-row{flex-wrap:wrap}.wk-row .badges{order:5;flex-basis:100%;margin-left:26px}
+  .tk{flex-wrap:wrap}.tk .badges{order:5;flex-basis:100%;margin-left:26px}
+  .tab-label{max-width:150px}
+}
+</style>
+
+<div class="wrap" id="app">
+  <div class="topbar">
+    <div class="topbar-l">
+      <h1>Mapa estratégico — Alberto Otero</h1>
+      <p>☆ marca el siguiente paso · 📝 detalle, fechas y seguimientos · ● prioridad de fase · doble clic edita en el PC</p>
+    </div>
+    <div class="topbar-r">
+      <div class="pill saving" id="pill"><div class="pill-dot"></div><span id="pill-txt">Conectando…</span></div>
+      <button class="btn btn-ghost" onclick="openSettings()">⚙ Ajustes</button>
+    </div>
+  </div>
+  <div class="tabs-bar" id="tabs"></div>
+  <div class="view" id="week-view"></div>
+  <div id="tracks"></div>
+  <div class="empty" id="boot-msg">
+    <h3>Cargando tus proyectos…</h3>
+    <p>Aquí aparecerán tus proyectos con sus fases y tareas. Si es la primera vez, crea uno con «＋ Nuevo proyecto» o importa tu <b>roadmap_tareas.json</b> desde Ajustes.</p>
+  </div>
+  <div class="log" id="log" hidden>
+    <button class="log-hd" onclick="toggleLog()">📋 Historial de cambios <span id="log-count">0 entradas</span></button>
+    <div class="log-bd" id="log-bd" hidden></div>
+  </div>
+</div>
+
+<!-- Nuevo proyecto -->
+<div class="overlay" id="m-new" hidden onclick="if(event.target===this)closeM('m-new')">
+  <div class="card">
+    <h2>Nuevo proyecto</h2>
+    <p>Se creará con una fase vacía para que empieces a añadir tareas.</p>
+    <input class="inp" id="new-name" type="text" placeholder="Nombre del proyecto" onkeydown="if(event.key==='Enter')confirmNew()">
+    <p id="new-err" class="status-msg" style="color:var(--danger)" hidden>Escribe un nombre para el proyecto.</p>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeM('m-new')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmNew()">Crear proyecto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Eliminar proyecto -->
+<div class="overlay" id="m-del" hidden onclick="if(event.target===this)closeM('m-del')">
+  <div class="card">
+    <h2>Eliminar proyecto</h2>
+    <p>¿Seguro que quieres eliminar <b id="del-name"></b>?</p>
+    <div class="danger-note">Se guarda una copia completa en el archivo de proyectos eliminados antes de borrarlo.</div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeM('m-del')">Cancelar</button>
+      <button class="btn btn-danger" onclick="executeDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detalle de tarea -->
+<div class="overlay" id="m-notes" hidden onclick="if(event.target===this)saveNotes()">
+  <div class="card">
+    <h2>Detalle de tarea</h2>
+    <div class="fields">
+      <div class="field"><label for="n-x">Tarea</label><input class="inp" id="n-x" type="text"></div>
+      <div class="grid2">
+        <div class="field"><label for="n-g">Etiqueta</label><input class="inp" id="n-g" type="text"></div>
+        <div class="field"><label for="n-fd">📅 Fecha objetivo</label><input class="inp" id="n-fd" type="date"></div>
+      </div>
+      <div class="field"><label for="n-n">📝 Notas</label><textarea class="ta" id="n-n" placeholder="Contexto, referencias, decisiones…"></textarea></div>
+      <div class="grid2">
+        <div class="field"><label for="n-w">⏳ Esperando a</label><input class="inp" id="n-w" type="text" placeholder="Quién tiene que responder"></div>
+        <div class="field"><label for="n-wd">🗓 Último contacto</label>
+          <div class="row"><input class="inp" id="n-wd" type="date"><button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('n-wd').value=localISO()">Hoy</button></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="n-resp">👤 Responsable</label><input class="inp" id="n-resp" type="text"></div>
+        <div class="field"><label for="n-link">🔗 Referencia</label><input class="inp" id="n-link" type="text" placeholder="URL, archivo, contacto…"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="linkbtn" onclick="deleteFromNotes()">Eliminar tarea</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeM('m-notes');_noteCtx=null">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="saveNotes()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ajustes -->
+<div class="overlay" id="m-sett" hidden onclick="if(event.target===this)closeM('m-sett')">
+  <div class="card">
+    <h2>⚙ Ajustes</h2>
+    <div class="sett">
+      <h3>⏳ Seguimientos</h3>
+      <p>Una tarea «esperando a…» se marca en naranja (toca insistir) cuando pasan estos días desde el último contacto.</p>
+      <div class="row" style="align-items:center"><input class="inp" type="number" min="1" max="90" id="wait-days" style="width:90px" onchange="setWaitDays(this.value)"><span style="font-size:12px;color:var(--text-muted)">días</span></div>
+    </div>
+    <div class="sett">
+      <h3>📤 Copia de seguridad</h3>
+      <p>Descarga todos tus proyectos en el mismo formato que <b>roadmap_tareas.json</b>. Sirve para volver a la versión local o como respaldo.</p>
+      <button class="btn btn-secondary btn-sm" id="btn-export" onclick="exportAll()">Descargar roadmap_tareas.json</button>
+      <p id="export-msg" class="status-msg" hidden></p>
+    </div>
+    <div class="sett">
+      <h3>📥 Importar</h3>
+      <p>Carga un <b>roadmap_tareas.json</b> completo o un proyecto exportado. Se añaden como proyectos nuevos; no se borra nada.</p>
+      <input type="file" id="import-file" accept=".json,application/json" onchange="importFile(this)" style="font-size:12px;max-width:100%">
+      <p id="import-msg" class="status-msg" hidden></p>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="closeM('m-sett')">Cerrar</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"><span id="toast-msg"></span><button id="toast-btn" onclick="toastAction()">Deshacer</button></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  MODELO
+//  projects/<clave>  → {name, pos, phases:[{l,d,t,tasks:[{x,g,c,n?,fd?,resp?,link?,w?,wd?,nx?}]}]}
+//  app/settings      → {waitDays}
+//  app/log           → {entries:[{ts,tag,msg}]}  (más reciente primero, máx. LOG_MAX)
+//  archive/<id>      → proyecto borrado + deletedAt
+//  Las claves de tarea son las mismas que en roadmap_tareas.json de la versión local.
+// ═══════════════════════════════════════════════
+const WEEK='__week';
+const LOG_MAX=400;
+let db=null, downloads=null;
+const S={projects:{}, settings:{waitDays:7}, log:[]};
+const loaded={projects:false};
+let currentTr=null, logOpen=false, pendingRender=false;
+const phOpen={};
+const dirty={}, timers={}, busy={}, queued={};
+let dragSrc=null, phDragSrc=null, _noteCtx=null, _pendingDelete=null;
+
+// ── utilidades ──
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function localISO(d=new Date()){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function order(){return Object.keys(S.projects).sort((a,b)=>(S.projects[a].pos??0)-(S.projects[b].pos??0)||a.localeCompare(b));}
+function P(tr){return S.projects[tr];}
+function trName(tr){return P(tr)?.name||tr;}
+function waitDays(){return S.settings.waitDays||7;}
+function daysSince(iso){if(!iso)return null;const [y,m,d]=iso.split('-').map(Number);const t=new Date();t.setHours(0,0,0,0);return Math.round((t-new Date(y,m-1,d))/86400000);}
+function isStale(t){const ds=daysSince(t.wd);return !!t.w&&!t.c&&ds!==null&&ds>=waitDays();}
+function $(id){return document.getElementById(id);}
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(_){return null;}}
+
+// ═══════════════════════════════════════════════
+//  PERSISTENCIA (db del artifact)
+// ═══════════════════════════════════════════════
+function bodyFor(path){
+  if(path==='app/settings')return {...S.settings};
+  if(path==='app/log')return {entries:S.log.slice(0,LOG_MAX)};
+  if(path.startsWith('projects/')){const p=P(path.slice(9));return p?clone(p):null;}
+  return null;
+}
+function save(path){
+  if(!db)return;
+  dirty[path]=true;setPill('saving','Guardando…');
+  clearTimeout(timers[path]);timers[path]=setTimeout(()=>flush(path),450);
+}
+const saveProject=tr=>save('projects/'+tr);
+async function flush(path,retried){
+  if(busy[path]){queued[path]=true;return;}
+  busy[path]=true;
+  try{
+    const body=bodyFor(path);
+    if(body)await db.doc(path).set(body);else await db.doc(path).delete();
+  }catch(e){
+    console.error('save',path,e);
+    if(e?.code==='unavailable'&&!retried){busy[path]=false;setTimeout(()=>flush(path,true),800+Math.random()*800);return;}
+    setPill('err',e?.code==='quota_exceeded'?'Sin espacio':'No se pudo guardar');
+  }
+  busy[path]=false;
+  if(queued[path]){queued[path]=false;flush(path);return;}
+  dirty[path]=false;
+  if(!Object.values(dirty).some(Boolean)&&!$('pill').classList.contains('err'))setPill('ok','Guardado');
+}
+function setPill(state,txt){$('pill').className='pill '+state;$('pill-txt').textContent=txt;}
+
+function appendLog(msg,tag){
+  const now=new Date();
+  const ts=now.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  S.log.unshift({ts,tag,msg});
+  if(S.log.length>LOG_MAX)S.log.length=LOG_MAX;
+  renderLog();save('app/log');
+}
+
+// Snapshots: lo que llega de otro dispositivo se aplica; lo propio pendiente de guardar, manda.
+function isEditing(){
+  const a=document.activeElement;
+  return !!(a&&a!==document.body&&a.matches('input,textarea,select')&&!a.closest('.overlay'));
+}
+function applyRemote(){
+  if(isEditing()){pendingRender=true;return;}
+  renderAll();
+}
+document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRender&&!isEditing()){pendingRender=false;renderAll();}},0));
+
+function onDbError(e){console.error('db',e);setPill('err',e?.code==='revoked'?'Sin acceso':'Sin conexión');}
+
+async function boot(){
+  const cl=window.claude;
+  db=cl?.use?await cl.use('db'):null;
+  if(!db){
+    setPill('err','Sin almacenamiento');
+    $('boot-msg').innerHTML='<h3>No se pueden cargar tus datos aquí</h3><p>Esta página guarda tus tareas en claude.ai. Ábrela desde tu enlace de claude.ai con tu cuenta iniciada.</p>';
+    return;
+  }
+  cl.use('downloads').then(d=>{downloads=d;if(!d)$('btn-export').disabled=true;});
+  db.collection('projects').onSnapshot(snap=>{
+    let changed=!loaded.projects;
+    snap.docChanges().forEach(ch=>{
+      const k=ch.doc.id,path='projects/'+k;
+      if(dirty[path]||busy[path])return;
+      if(ch.type==='removed'){if(S.projects[k]){delete S.projects[k];changed=true;}return;}
+      const d=ch.doc.data();
+      if(JSON.stringify(S.projects[k])===JSON.stringify(d))return;
+      S.projects[k]=clone(d);changed=true;
+    });
+    loaded.projects=true;
+    if(changed)applyRemote();
+    if(!Object.values(dirty).some(Boolean))setPill('ok','Guardado');
+  },onDbError);
+  db.doc('app/settings').onSnapshot(s=>{
+    if(dirty['app/settings']||busy['app/settings']||!s.exists)return;
+    const d=s.data();if(JSON.stringify(d)===JSON.stringify(S.settings))return;
+    S.settings={...d};if(loaded.projects)applyRemote();
+  },onDbError);
+  db.doc('app/log').onSnapshot(s=>{
+    if(dirty['app/log']||busy['app/log']||!s.exists)return;
+    S.log=clone(s.data().entries||[]);renderLog();
+  },onDbError);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════
+function renderAll(){
+  const ord=order();
+  if(currentTr!==WEEK&&!P(currentTr))currentTr=ord.length?WEEK:null;
+  if(currentTr===null&&ord.length)currentTr=WEEK;
+  ord.forEach(tr=>{if(!phOpen[tr])phOpen[tr]={0:true};});
+  $('boot-msg').hidden=!!ord.length;
+  if(!ord.length){
+    $('boot-msg').innerHTML='<h3>Sin proyectos todavía</h3><p>Crea tu primer proyecto con «＋ Nuevo proyecto» o importa tu <b>roadmap_tareas.json</b> desde ⚙ Ajustes.</p>';
+  }
+  $('log').hidden=false;
+  renderTabs();
+  // contenedores por proyecto
+  const box=$('tracks');
+  const have=new Set([...box.children].map(c=>c.dataset.tr));
+  ord.forEach(tr=>{if(!have.has(tr)){const d=document.createElement('div');d.className='view';d.dataset.tr=tr;d.id='t-'+tr;box.appendChild(d);}});
+  [...box.children].forEach(c=>{if(!P(c.dataset.tr))c.remove();});
+  showView();
+  if(currentTr)render(currentTr);
+  renderLog();
+}
+function showView(){
+  $('week-view').classList.toggle('show',currentTr===WEEK);
+  [...$('tracks').children].forEach(c=>c.classList.toggle('show',c.dataset.tr===currentTr));
+}
+function sw(tr){currentTr=tr;renderTabs();showView();render(tr);window.scrollTo({top:0});}
+
+function render(tr){
+  if(tr===WEEK){renderWeek();return;}
+  if(!P(tr))return;
+  renderTrack(tr);
+  if(currentTr===WEEK)renderWeek();
+}
+
+function renderTabs(){
+  const ord=order();
+  let h=ord.length?`<button class="tab tab-week${currentTr===WEEK?' active':''}" onclick="sw('${WEEK}')"><span class="tab-label">📅 Esta semana</span></button>`:'';
+  h+=ord.map(tr=>`<div class="tab${tr===currentTr?' active':''}" role="button" tabindex="0" onclick="sw('${tr}')" onkeydown="if(event.key==='Enter')sw('${tr}')" id="tab-${tr}">
+      <span class="tab-label">${esc(trName(tr))}</span>
+      <button class="tab-ic" title="Renombrar proyecto" onclick="event.stopPropagation();renameTab('${tr}')">✏</button>
+      ${ord.length>1?`<button class="tab-ic x" title="Eliminar proyecto" onclick="event.stopPropagation();askDelete('${tr}')">✕</button>`:''}
+    </div>`).join('');
+  h+=`<button class="tab tab-add" onclick="openNew()">＋ Nuevo proyecto</button>`;
+  $('tabs').innerHTML=h;
+}
+
+function taskBadges(t,today){
+  let b='';
+  if(t.fd){const o=t.fd<today&&!t.c;b+=`<span class="bdg ${o?'b-over':'b-date'}">${o?'⚠ ':'📅 '}${esc(t.fd)}</span>`;}
+  if(t.w&&!t.c){
+    const ds=daysSince(t.wd),st=isStale(t);
+    const tip=`Esperando a ${t.w}`+(ds!==null?` · último contacto hace ${ds} día${ds===1?'':'s'}`:'')+(st?' · toca insistir':'');
+    b+=`<span class="bdg ${st?'b-stale':'b-wait'}" title="${esc(tip)}">⏳ ${esc(t.w)}${ds!==null?' · '+ds+'d':''}</span>`;
+  }
+  if(t.n)b+=`<span class="bdg b-note">📝</span>`;
+  return b?`<div class="badges">${b}</div>`:'';
+}
+const hasDetail=t=>!!(t.n||t.fd||t.resp||t.link||t.w);
+function starBtn(tr,pi,ti,t){return `<button class="ic hov star ${t.nx?'on':''}" title="${t.nx?'Quitar de siguiente paso':'Marcar como siguiente paso'}" onclick="tgNx('${tr}',${pi},${ti})">${t.nx?'★':'☆'}</button>`;}
+function noteBtn(tr,pi,ti,t){return `<button class="ic hov note ${hasDetail(t)?'has':''}" title="Detalle de la tarea" onclick="openNotes('${tr}',${pi},${ti})">📝</button>`;}
+
+function renderTrack(tr){
+  const el=$('t-'+tr);if(!el)return;
+  const phases=P(tr).phases||[];
+  if(!phases.length){
+    el.innerHTML=`<div class="empty"><h3>Sin fases todavía</h3><p>Añade tu primera fase para empezar a organizar tareas.</p><p style="margin-top:1rem"><button class="apb" style="display:inline-flex;width:auto" onclick="aPh('${tr}')">+ Añadir primera fase</button></p></div>`;
+    return;
+  }
+  const total=phases.reduce((s,p)=>s+p.tasks.length,0),done=phases.reduce((s,p)=>s+p.tasks.filter(t=>t.c).length,0);
+  const PRIO={n:'🔴 Urgente',s:'🟡 Próximo',l:'🔵 Futuro'};
+  const today=localISO();
+  let h=`<div class="summary">
+    <div class="sc"><div class="sc-l">Completadas</div><div class="sc-v">${done}/${total}</div></div>
+    <div class="sc"><div class="sc-l">Fases</div><div class="sc-v">${phases.length}</div></div>
+    <div class="sc"><div class="sc-l">Avance</div><div class="sc-v">${total?Math.round(done/total*100):0}%</div></div>
+  </div>`;
+  phases.forEach((ph,pi)=>{
+    const isO=!!phOpen[tr]?.[pi];
+    const pp=ph.tasks.length?Math.round(ph.tasks.filter(t=>t.c).length/ph.tasks.length*100):0;
+    const dc={n:'dn',s:'ds',l:'dl'}[ph.d]||'dl';
+    h+=`<div class="phase" id="ph-${tr}-${pi}" draggable="true"
+        ondragstart="phDragStart(event,'${tr}',${pi})" ondragover="phDragOver(event,'${tr}',${pi})"
+        ondragleave="phDragLeave('${tr}',${pi})" ondrop="phDrop(event,'${tr}',${pi})" ondragend="phDragEnd('${tr}')">
+      <div class="ph" onclick="tog('${tr}',${pi})">
+        <span class="phdh" title="Arrastrar" onclick="event.stopPropagation()">⠿</span>
+        <div class="ph-arrows" onclick="event.stopPropagation()">
+          <button class="ph-arr" title="Subir fase" onclick="movePh('${tr}',${pi},-1)" ${pi===0?'disabled':''}>▲</button>
+          <button class="ph-arr" title="Bajar fase" onclick="movePh('${tr}',${pi},1)" ${pi===phases.length-1?'disabled':''}>▼</button>
+        </div>
+        <button class="dot ${dc}" title="${PRIO[ph.d]||PRIO.l} — clic para cambiar" onclick="event.stopPropagation();cycleDot('${tr}',${pi})"></button>
+        <span class="pl">${esc(ph.l)}</span>
+        <button class="ic hov" title="Editar nombre de fase" onclick="event.stopPropagation();editPh('${tr}',${pi},'l')">✏</button>
+        <button class="ptag" title="Editar etiqueta de tiempo" onclick="event.stopPropagation();editPh('${tr}',${pi},'t')">${esc(ph.t)}</button>
+        ${phases.length>1?`<button class="ic hov del" title="Eliminar fase" onclick="event.stopPropagation();dPh('${tr}',${pi})">✕</button>`:''}
+        <span class="chev ${isO?'o':''}">▶</span>
+      </div>
+      <div class="pb ${isO?'o':''}">`;
+    ph.tasks.forEach((t,ti)=>{
+      h+=`<div class="tk" id="tk-${tr}-${pi}-${ti}" draggable="true"
+          ondragstart="dragStart(event,'${tr}',${pi},${ti})" ondragover="dragOver(event,this)"
+          ondragleave="this.classList.remove('drag-over')" ondrop="drop(event,'${tr}',${pi},${ti})" ondragend="dragEnd()">
+        <span class="dh">⠿</span>
+        <button class="cb ${t.c?'ck':''}" title="${t.c?'Desmarcar':'Completar'}" onclick="tgD('${tr}',${pi},${ti})"></button>
+        <span class="tx ${t.c?'done':''}" ondblclick="eT('${tr}',${pi},${ti},'x',this)">${esc(t.x)}</span>
+        ${taskBadges(t,today)}
+        ${t.c?'':starBtn(tr,pi,ti,t)}
+        ${noteBtn(tr,pi,ti,t)}
+        <span class="tg" ondblclick="eT('${tr}',${pi},${ti},'g',this)">${esc(t.g)}</span>
+        <button class="ic hov del" title="Eliminar tarea" onclick="dT('${tr}',${pi},${ti})">✕</button>
+      </div>`;
+    });
+    h+=`<div class="ar">
+        <input class="ai" id="ni-${tr}-${pi}" placeholder="Nueva tarea…" onkeydown="if(event.key==='Enter')aT('${tr}',${pi})">
+        <input class="ati" id="ng-${tr}-${pi}" value="acción" aria-label="Etiqueta" onkeydown="if(event.key==='Enter')aT('${tr}',${pi})">
+        <button class="ab" onclick="aT('${tr}',${pi})">+ Añadir</button>
+      </div>
+      <div class="bo"><div class="bi" style="width:${pp}%"></div></div>
+      </div></div>`;
+  });
+  h+=`<button class="apb" onclick="aPh('${tr}')">+ Añadir nueva fase</button>`;
+  el.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════
+//  "ESTA SEMANA"
+// ═══════════════════════════════════════════════
+function openTasks(){
+  const out=[];
+  order().forEach(tr=>(P(tr).phases||[]).forEach((ph,pi)=>ph.tasks.forEach((t,ti)=>{if(!t.c)out.push({tr,pi,ti,task:t,ph});})));
+  return out;
+}
+// ★ si hay; si no, la primera pendiente de la fase más prioritaria (🔴>🟡>🔵) que no espere a nadie.
+function nextSteps(tr){
+  const phases=P(tr).phases||[],starred=[];
+  phases.forEach((ph,pi)=>ph.tasks.forEach((t,ti)=>{if(t.nx&&!t.c)starred.push({tr,pi,ti,task:t,ph});}));
+  if(starred.length)return {items:starred,suggested:false};
+  const rank={n:0,s:1,l:2};
+  const by=phases.map((ph,pi)=>({ph,pi})).sort((a,b)=>(rank[a.ph.d]??2)-(rank[b.ph.d]??2)||a.pi-b.pi);
+  for(const {ph,pi} of by){const ti=ph.tasks.findIndex(t=>!t.c&&!t.w);if(ti>=0)return {items:[{tr,pi,ti,task:ph.tasks[ti],ph}],suggested:true};}
+  return {items:[],suggested:false};
+}
+function weekRow(o,today,opts={}){
+  const {tr,pi,ti,task:t,ph}=o;
+  const meta=opts.showProject===false?esc(ph.l):`${esc(trName(tr))} · ${esc(ph.l)}`;
+  return `<div class="wk-row">
+    <button class="cb" title="Completar" onclick="tgD('${tr}',${pi},${ti})"></button>
+    <div class="wk-main">
+      <button class="wk-tx" title="Ir a la tarea en su proyecto" onclick="jumpTo('${tr}',${pi},${ti})">${esc(t.x)}</button>
+      <div class="wk-meta">${meta}${opts.suggested?' · <span class="wk-sug">sugerida — marca ☆ en una tarea para fijarla</span>':''}</div>
+    </div>
+    ${taskBadges(t,today)}
+    ${opts.follow?`<button class="ab" title="Registrar que hoy volviste a contactar" onclick="followUp('${tr}',${pi},${ti})">Insistí hoy</button>`:''}
+    ${starBtn(tr,pi,ti,t)}${noteBtn(tr,pi,ti,t)}
+  </div>`;
+}
+function weekSection(title,items,today,empty,opts){
+  const body=items.length?items.map(o=>weekRow(o,today,opts)).join(''):`<div class="wk-empty">${empty}</div>`;
+  return `<div class="wk-sec"><div class="wk-hd">${title}<span class="wk-n">${items.length||''}</span></div><div class="wk-bd">${body}</div></div>`;
+}
+function renderWeek(){
+  const el=$('week-view');
+  const ord=order();
+  if(!ord.length){el.innerHTML='';return;}
+  const today=localISO();
+  const in7=(()=>{const d=new Date();d.setDate(d.getDate()+7);return localISO(d);})();
+  const open=openTasks(),byDate=(a,b)=>a.task.fd.localeCompare(b.task.fd);
+  const overdue=open.filter(o=>o.task.fd&&o.task.fd<today).sort(byDate);
+  const soon=open.filter(o=>o.task.fd&&o.task.fd>=today&&o.task.fd<=in7).sort(byDate);
+  const waiting=open.filter(o=>o.task.w).sort((a,b)=>(daysSince(b.task.wd)??-1)-(daysSince(a.task.wd)??-1));
+  const stale=waiting.filter(o=>isStale(o.task)).length;
+
+  // Captura rápida: conservar lo escrito si se repinta
+  const prevTxt=$('q-x')?.value||'';
+  const lastDest=store('roadmap_quick_dest');
+  let opts='';
+  ord.forEach(tr=>(P(tr).phases||[]).forEach((ph,pi)=>{const v=`${tr}|${pi}`;opts+=`<option value="${esc(v)}"${v===lastDest?' selected':''}>${esc(trName(tr))} · ${esc(ph.l)}</option>`;}));
+  let h=`<form class="quick" onsubmit="event.preventDefault();quickAdd()">
+      <input id="q-x" type="text" placeholder="Apunta una tarea nueva…" value="${esc(prevTxt)}" aria-label="Nueva tarea">
+      <select id="q-dest" aria-label="Proyecto y fase">${opts}</select>
+      <button class="ab" type="submit">+ Añadir</button>
+    </form>`;
+  h+=`<div class="summary">
+    <div class="sc${overdue.length?' alert':''}"><div class="sc-l">Vencidas</div><div class="sc-v">${overdue.length}</div></div>
+    <div class="sc"><div class="sc-l">Próximos 7 días</div><div class="sc-v">${soon.length}</div></div>
+    <div class="sc"><div class="sc-l">Esperando respuesta</div><div class="sc-v">${waiting.length}</div></div>
+    <div class="sc${stale?' warn':''}"><div class="sc-l">Toca insistir</div><div class="sc-v">${stale}</div></div>
+  </div>`;
+  let nx='';
+  ord.forEach(tr=>{
+    const {items,suggested}=nextSteps(tr);
+    nx+=`<div class="wk-proj">${esc(trName(tr))}</div>`;
+    nx+=items.length?items.map(o=>weekRow(o,today,{suggested,showProject:false})).join(''):`<div class="wk-empty">Nada pendiente en este proyecto.</div>`;
+  });
+  h+=`<div class="wk-sec"><div class="wk-hd">⭐ Siguiente paso por proyecto</div><div class="wk-bd">${nx}</div></div>`;
+  if(overdue.length)h+=weekSection('⚠ Vencidas',overdue,today,'');
+  h+=weekSection('📅 Próximos 7 días',soon,today,'Nada con fecha esta semana. Pon una fecha objetivo desde 📝 en cualquier tarea.');
+  h+=weekSection('⏳ Esperando respuesta',waiting,today,'No esperas a nadie. En 📝 → «Esperando a» anota quién tiene que responderte.',{follow:true});
+  el.innerHTML=h;
+}
+function quickAdd(){
+  const x=$('q-x').value.trim();if(!x){$('q-x').focus();return;}
+  const [tr,piS]=($('q-dest').value||'').split('|');const pi=+piS;
+  const ph=P(tr)?.phases?.[pi];if(!ph)return;
+  store('roadmap_quick_dest',`${tr}|${pi}`);
+  const task={x,g:'acción',c:false};
+  ph.tasks.push(task);saveProject(tr);
+  appendLog(`${trName(tr)} · Nueva tarea en "${ph.l}": "${x}" [acción]`,'añadida');
+  $('q-x').value='';
+  render(tr);
+  offerUndo(`Añadida en ${trName(tr)} · ${ph.l}`,()=>{
+    const i=ph.tasks.indexOf(task);if(i<0)return;
+    ph.tasks.splice(i,1);saveProject(tr);
+    appendLog(`${trName(tr)} · Tarea eliminada: "${x}"`,'eliminada');render(tr);
+  });
+}
+function jumpTo(tr,pi,ti){
+  if(!phOpen[tr])phOpen[tr]={};
+  phOpen[tr][pi]=true;sw(tr);
+  const el=$(`tk-${tr}-${pi}-${ti}`);
+  if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');}
+}
+
+// ═══════════════════════════════════════════════
+//  ACCIONES
+// ═══════════════════════════════════════════════
+function tog(tr,pi){phOpen[tr][pi]=!phOpen[tr][pi];render(tr);}
+function cycleDot(tr,pi){
+  const ph=P(tr).phases[pi],o=['n','s','l'],next=o[(o.indexOf(ph.d||'n')+1)%3];
+  const lbl={n:'🔴 Urgente',s:'🟡 Próximo',l:'🔵 Futuro'};
+  ph.d=next;saveProject(tr);
+  appendLog(`${trName(tr)} · "${ph.l}" → prioridad ${lbl[next]}`,'prioridad');render(tr);
+}
+function tgD(tr,pi,ti){
+  const t=P(tr).phases[pi].tasks[ti];t.c=!t.c;saveProject(tr);
+  appendLog(`${trName(tr)} · "${t.x}" → ${t.c?'✅ completada':'⬜ desmarcada'}`,t.c?'completada':'desmarcada');
+  render(tr);
+  if(t.c&&currentTr===WEEK)offerUndo(`Completada: "${t.x}"`,()=>{if(t.c){t.c=false;saveProject(tr);appendLog(`${trName(tr)} · "${t.x}" → ⬜ desmarcada`,'desmarcada');render(tr);}});
+}
+function tgNx(tr,pi,ti){
+  const t=P(tr).phases[pi].tasks[ti];
+  if(t.nx)delete t.nx;else t.nx=true;saveProject(tr);
+  appendLog(`${trName(tr)} · "${t.x}" → ${t.nx?'★ siguiente paso':'☆ ya no es siguiente paso'}`,'siguiente');render(tr);
+}
+function followUp(tr,pi,ti){
+  const t=P(tr).phases[pi].tasks[ti];t.wd=localISO();saveProject(tr);
+  appendLog(`${trName(tr)} · Seguimiento con ${t.w} (${t.wd}): "${t.x}"`,'seguimiento');render(tr);
+}
+function dT(tr,pi,ti){
+  const ph=P(tr).phases[pi];const [item]=ph.tasks.splice(ti,1);saveProject(tr);
+  appendLog(`${trName(tr)} · Tarea eliminada: "${item.x}"`,'eliminada');render(tr);
+  offerUndo(`Tarea eliminada: "${item.x}"`,()=>{
+    if(!P(tr)?.phases.includes(ph))return;
+    ph.tasks.splice(Math.min(ti,ph.tasks.length),0,item);saveProject(tr);
+    appendLog(`${trName(tr)} · Tarea restaurada: "${item.x}"`,'restaurada');render(tr);
+  });
+}
+function aT(tr,pi){
+  const ni=$(`ni-${tr}-${pi}`),ng=$(`ng-${tr}-${pi}`);
+  const x=ni.value.trim();if(!x){ni.focus();return;}
+  const g=ng.value.trim()||'acción';
+  P(tr).phases[pi].tasks.push({x,g,c:false});saveProject(tr);
+  appendLog(`${trName(tr)} · Nueva tarea en "${P(tr).phases[pi].l}": "${x}" [${g}]`,'añadida');
+  render(tr);setTimeout(()=>$(`ni-${tr}-${pi}`)?.focus(),30);
+}
+function aPh(tr){
+  const phases=P(tr).phases;phases.push({l:'Nueva fase',d:'l',t:'pendiente',tasks:[]});
+  phOpen[tr][phases.length-1]=true;saveProject(tr);
+  appendLog(`${trName(tr)} · Nueva fase añadida`,'fase-nueva');render(tr);
+}
+// Sin confirm(): el visor no muestra diálogos. Borrar una fase se puede deshacer.
+function dPh(tr,pi){
+  const phases=P(tr).phases;if(phases.length<=1)return;
+  const [ph]=phases.splice(pi,1);saveProject(tr);
+  const o=phOpen[tr]||{},n={};Object.keys(o).forEach(k=>{const i=+k;if(i!==pi)n[i>pi?i-1:i]=o[k];});phOpen[tr]=n;
+  appendLog(`${trName(tr)} · Fase eliminada: "${ph.l}" (${ph.tasks.length} tareas)`,'fase-eliminada');render(tr);
+  offerUndo(`Fase eliminada: "${ph.l}" con ${ph.tasks.length} tareas`,()=>{
+    if(!P(tr))return;
+    const ps=P(tr).phases,at=Math.min(pi,ps.length);ps.splice(at,0,ph);
+    const o2=phOpen[tr]||{},n2={};Object.keys(o2).forEach(k=>{const i=+k;n2[i>=at?i+1:i]=o2[k];});n2[at]=true;phOpen[tr]=n2;
+    saveProject(tr);appendLog(`${trName(tr)} · Fase restaurada: "${ph.l}"`,'restaurada');render(tr);
+  });
+}
+function inlineEdit(span,cls,orig,onSave){
+  const inp=document.createElement('input');inp.className=cls;inp.value=orig;
+  inp.addEventListener('click',e=>e.stopPropagation());
+  span.replaceWith(inp);inp.focus();inp.select();
+  let doneE=false;
+  const sv=()=>{if(doneE)return;doneE=true;const v=inp.value.trim()||orig;onSave(v,v!==orig);};
+  inp.addEventListener('blur',sv);
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();sv();}if(ev.key==='Escape'){ev.preventDefault();inp.value=orig;sv();}});
+}
+function eT(tr,pi,ti,f,span){
+  const t=P(tr).phases[pi].tasks[ti],orig=t[f];
+  inlineEdit(span,f==='g'?'tg-inp':'tx-inp',orig,(v,ch)=>{
+    if(ch){t[f]=v;saveProject(tr);appendLog(f==='g'?`${trName(tr)} · Etiqueta: "${orig}"→"${v}"`:`${trName(tr)} · Tarea editada: "${orig}"→"${v}"`,'editada');}
+    render(tr);
+  });
+}
+function editPh(tr,pi,f){
+  const ph=P(tr).phases[pi],box=$(`ph-${tr}-${pi}`),span=box?.querySelector(f==='l'?'.pl':'.ptag');if(!span)return;
+  const orig=ph[f];
+  inlineEdit(span,f==='l'?'pl-inp':'ptag-inp',orig,(v,ch)=>{
+    if(ch){ph[f]=v;saveProject(tr);appendLog(f==='l'?`${trName(tr)} · Fase renombrada: "${orig}"→"${v}"`:`${trName(tr)} · Etiqueta de fase: "${orig}"→"${v}"`,f==='l'?'renombrada':'etiqueta');}
+    render(tr);
+  });
+}
+function renameTab(tr){
+  const lab=$('tab-'+tr)?.querySelector('.tab-label');if(!lab)return;
+  const orig=trName(tr);
+  inlineEdit(lab,'tab-rename',orig,(v,ch)=>{
+    if(ch){P(tr).name=v;saveProject(tr);appendLog(`Proyecto renombrado: "${orig}"→"${v}"`,'renombrado');}
+    renderTabs();if(currentTr===WEEK)renderWeek();
+  });
+}
+function movePh(tr,pi,dir){
+  const ps=P(tr).phases,np=pi+dir;if(np<0||np>=ps.length)return;
+  [ps[pi],ps[np]]=[ps[np],ps[pi]];
+  const tmp=phOpen[tr][pi];phOpen[tr][pi]=phOpen[tr][np];phOpen[tr][np]=tmp;
+  saveProject(tr);appendLog(`${trName(tr)} · Fase movida: "${ps[np].l}" → posición ${np+1}`,'fase-reorden');render(tr);
+}
+
+// ── Detalle de tarea ──
+function openNotes(tr,pi,ti){
+  _noteCtx={tr,pi,ti,task:P(tr).phases[pi].tasks[ti]};
+  const t=_noteCtx.task;
+  const F={x:'n-x',g:'n-g',fd:'n-fd',n:'n-n',w:'n-w',wd:'n-wd',resp:'n-resp',link:'n-link'};
+  Object.entries(F).forEach(([k,id])=>$(id).value=t[k]||'');
+  openM('m-notes');
+}
+function saveNotes(){
+  if(!_noteCtx)return closeM('m-notes');
+  const {tr,pi,ti}=_noteCtx;let t=_noteCtx.task;_noteCtx=null;closeM('m-notes');
+  if(!P(tr))return;
+  // Si mientras estaba abierto llegó un cambio de otro dispositivo, la tarea es otro objeto
+  if(!P(tr).phases.some(ph=>ph.tasks.includes(t))){t=P(tr).phases[pi]?.tasks[ti];if(!t)return;}
+  const v=id=>$(id).value.trim();
+  const nw={x:v('n-x')||t.x,g:v('n-g')||t.g,fd:v('n-fd'),n:$('n-n').value.trim(),resp:v('n-resp'),link:v('n-link'),w:v('n-w')};
+  nw.wd=nw.w?(v('n-wd')||localISO()):'';
+  const keys=['x','g','fd','n','resp','link','w','wd'];
+  if(keys.every(k=>(t[k]||'')===nw[k]))return;
+  const prev={...t};
+  keys.forEach(k=>{if(nw[k])t[k]=nw[k];else delete t[k];});
+  saveProject(tr);
+  if(prev.x!==t.x)appendLog(`${trName(tr)} · Tarea editada: "${prev.x}"→"${t.x}"`,'editada');
+  if((prev.w||'')!==(t.w||'')||(prev.wd||'')!==(t.wd||'')){
+    if(!t.w)appendLog(`${trName(tr)} · Ya no espera a ${prev.w}: "${t.x}"`,'esperando');
+    else if(t.w!==prev.w)appendLog(`${trName(tr)} · Esperando a ${t.w}: "${t.x}"`,'esperando');
+    else appendLog(`${trName(tr)} · Seguimiento con ${t.w} (${t.wd}): "${t.x}"`,'seguimiento');
+  }else if(['g','fd','n','resp','link'].some(k=>(prev[k]||'')!==(t[k]||'')))appendLog(`${trName(tr)} · Detalle actualizado: "${t.x}"`,'notas');
+  render(tr);
+}
+function deleteFromNotes(){
+  if(!_noteCtx)return;
+  const {tr,task}=_noteCtx;_noteCtx=null;closeM('m-notes');
+  const phases=P(tr)?.phases||[];
+  for(let pi=0;pi<phases.length;pi++){const ti=phases[pi].tasks.indexOf(task);if(ti>=0)return dT(tr,pi,ti);}
+}
+
+// ── Proyectos ──
+function openNew(){$('new-name').value='';$('new-err').hidden=true;openM('m-new');setTimeout(()=>$('new-name').focus(),60);}
+function nextPos(){return Math.max(-1,...Object.values(S.projects).map(p=>p.pos??0))+1;}
+function confirmNew(){
+  const name=$('new-name').value.trim();if(!name){$('new-err').hidden=false;return;}
+  closeM('m-new');
+  const key='p_'+Date.now();
+  S.projects[key]={name,pos:nextPos(),phases:[{l:'Fase 1',d:'l',t:'pendiente',tasks:[]}]};
+  phOpen[key]={0:true};saveProject(key);
+  appendLog(`Nuevo proyecto creado: "${name}"`,'proyecto-nuevo');
+  currentTr=key;renderAll();
+}
+function askDelete(tr){_pendingDelete=tr;$('del-name').textContent=`"${trName(tr)}"`;openM('m-del');}
+async function executeDelete(){
+  const tr=_pendingDelete;_pendingDelete=null;closeM('m-del');if(!P(tr))return;
+  const name=trName(tr),copy=clone(P(tr));
+  try{await db.doc(`archive/${tr}-${Date.now()}`).set({...copy,key:tr,deletedAt:new Date().toISOString()});}
+  catch(e){console.error(e);setPill('err','No se pudo archivar');return;}
+  delete S.projects[tr];delete phOpen[tr];saveProject(tr);
+  appendLog(`Proyecto eliminado y archivado: "${name}"`,'proyecto-eliminado');
+  currentTr=WEEK;renderAll();
+}
+
+// ── Ajustes, exportar, importar ──
+function openSettings(){$('wait-days').value=waitDays();$('import-msg').hidden=true;$('export-msg').hidden=true;openM('m-sett');}
+function setWaitDays(v){
+  const n=Math.max(1,Math.min(90,parseInt(v,10)||7));$('wait-days').value=n;
+  if(n===waitDays())return;
+  S.settings={...S.settings,waitDays:n};save('app/settings');
+  appendLog(`Ajustes · Insistir tras ${n} días sin respuesta`,'ajustes');if(currentTr)render(currentTr);
+}
+// Mismo formato que roadmap_tareas.json de la versión local
+function localFormat(){
+  const out={},ord=order();
+  ord.forEach(tr=>{out[tr]={phases:clone(P(tr).phases)};});
+  out._names=Object.fromEntries(ord.map(tr=>[tr,trName(tr)]));
+  out._order=ord;out._settings={...S.settings};
+  return out;
+}
+async function exportAll(){
+  const msg=$('export-msg');msg.hidden=false;msg.style.color='';
+  if(!downloads){msg.textContent='Las descargas no están disponibles en esta vista.';return;}
+  try{
+    await downloads.save({filename:'roadmap_tareas.json',data:JSON.stringify(localFormat(),null,2)});
+    msg.textContent='Copia descargada.';appendLog('Copia de seguridad descargada','export');
+  }catch(e){msg.textContent=e?.code==='declined'?'Descarga cancelada.':'No se pudo descargar la copia.';}
+}
+function importFile(input){
+  const file=input.files[0];if(!file)return;
+  const msg=$('import-msg');msg.hidden=false;msg.style.color='';
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const items=[];
+      if(Array.isArray(data._order)){data._order.forEach(k=>{if(data[k]?.phases)items.push({name:data._names?.[k]||k,phases:data[k].phases});});}
+      else if(Array.isArray(data.phases))items.push({name:data._export?.name||file.name.replace(/\.json$/i,''),phases:data.phases});
+      if(!items.length)throw new Error('formato');
+      let pos=nextPos();
+      items.forEach((it,i)=>{
+        const key=`p_${Date.now()}_${i}`;
+        S.projects[key]={name:it.name,pos:pos++,phases:clone(it.phases)};phOpen[key]={0:true};saveProject(key);
+        appendLog(`Proyecto importado: "${it.name}"`,'import');
+      });
+      msg.textContent=`Importado${items.length>1?'s':''}: ${items.map(i=>i.name).join(', ')}.`;
+      currentTr=WEEK;renderAll();
+    }catch(_){msg.textContent='Ese archivo no es un roadmap válido (roadmap_tareas.json o un proyecto exportado).';msg.style.color='var(--danger)';}
+    input.value='';
+  };
+  r.readAsText(file);
+}
+
+// ── Log ──
+function toggleLog(){logOpen=!logOpen;$('log-bd').hidden=!logOpen;}
+function renderLog(){
+  $('log-count').textContent=S.log.length+' entrada'+(S.log.length!==1?'s':'');
+  $('log-bd').innerHTML=S.log.length?S.log.slice(0,150).map(e=>`<div class="log-row"><span class="log-ts">${esc(e.ts)}</span><span class="log-msg">${esc(e.msg)}</span><span class="log-tag">${esc(e.tag)}</span></div>`).join(''):'<div class="log-row"><span class="log-msg">Sin cambios registrados aún</span></div>';
+}
+
+// ── Modales y toast ──
+function openM(id){$(id).hidden=false;}
+function closeM(id){$(id).hidden=true;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){['m-new','m-del','m-sett'].forEach(closeM);if(!$('m-notes').hidden){_noteCtx=null;closeM('m-notes');}}});
+let _undo=null,_toastT=null;
+function offerUndo(msg,fn){_undo=fn;$('toast-msg').textContent=msg;$('toast').classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(hideToast,7000);}
+function hideToast(){$('toast').classList.remove('show');_undo=null;}
+function toastAction(){const f=_undo;hideToast();if(f)f();}
+
+// ── Arrastrar (PC) ──
+function dragStart(e,tr,pi,ti){if(phDragSrc)return;dragSrc={tr,pi,ti};e.dataTransfer.effectAllowed='move';e.stopPropagation();setTimeout(()=>e.target.classList.add('dragging'),0);}
+function dragOver(e,el){if(phDragSrc)return;e.preventDefault();document.querySelectorAll('.tk').forEach(x=>x.classList.remove('drag-over'));el.classList.add('drag-over');}
+function dragEnd(){document.querySelectorAll('.tk').forEach(x=>x.classList.remove('dragging','drag-over'));}
+function drop(e,tr,pi,ti){
+  if(phDragSrc)return;e.preventDefault();e.stopPropagation();dragEnd();
+  if(!dragSrc||dragSrc.tr!==tr||dragSrc.pi!==pi||dragSrc.ti===ti){dragSrc=null;return;}
+  const tasks=P(tr).phases[pi].tasks,[item]=tasks.splice(dragSrc.ti,1);tasks.splice(ti,0,item);
+  dragSrc=null;saveProject(tr);appendLog(`${trName(tr)} · Tarea reordenada: "${item.x}"`,'reorden');render(tr);
+}
+function phDragStart(e,tr,pi){phDragSrc={tr,pi};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','ph');setTimeout(()=>$(`ph-${tr}-${pi}`)?.classList.add('ph-dragging'),0);}
+function phDragOver(e,tr,pi){
+  if(!phDragSrc||phDragSrc.tr!==tr||phDragSrc.pi===pi)return;e.preventDefault();e.stopPropagation();
+  document.querySelectorAll(`#t-${tr} .phase`).forEach(el=>el.classList.remove('ph-over-top','ph-over-bot'));
+  const el=$(`ph-${tr}-${pi}`),r=el.getBoundingClientRect();el.classList.add(e.clientY<r.top+r.height/2?'ph-over-top':'ph-over-bot');
+}
+function phDragLeave(tr,pi){$(`ph-${tr}-${pi}`)?.classList.remove('ph-over-top','ph-over-bot');}
+function phDrop(e,tr,pi){
+  if(!phDragSrc||phDragSrc.tr!==tr)return;e.preventDefault();e.stopPropagation();
+  const from=phDragSrc.pi;if(from===pi){phDragEnd(tr);return;}
+  const el=$(`ph-${tr}-${pi}`),r=el.getBoundingClientRect();let ins=e.clientY>=r.top+r.height/2?pi+1:pi;
+  const ps=P(tr).phases,[moved]=ps.splice(from,1),idx=ins>from?ins-1:ins;ps.splice(idx,0,moved);
+  const n={};Object.keys(phOpen[tr]||{}).forEach(k=>{const o=+k;let m;if(o===from)m=idx;else if(from<idx)m=o>from&&o<=idx?o-1:o;else m=o>=idx&&o<from?o+1:o;n[m]=phOpen[tr][k];});phOpen[tr]=n;
+  phDragSrc=null;saveProject(tr);appendLog(`${trName(tr)} · Fase reordenada: "${moved.l}"`,'fase-reorden');render(tr);
+}
+function phDragEnd(tr){document.querySelectorAll(`#t-${tr} .phase`).forEach(el=>el.classList.remove('ph-dragging','ph-over-top','ph-over-bot'));phDragSrc=null;}
+
+boot();
+</script>
